@@ -6,7 +6,7 @@ import 'components/persistent_nav.dart';
 import 'blocs/authentication_bloc/authentication_bloc.dart';
 
 class MyAppView extends StatelessWidget {
-  const MyAppView();
+  const MyAppView({super.key});
 
   @override
   Widget build(BuildContext context) {
