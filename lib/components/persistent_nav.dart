@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 import 'package:sh_app/screens/favourites/favourites_screen.dart';
 import 'package:sh_app/screens/home/home_screen.dart';
 import 'package:sh_app/screens/inbox/inbox_screen.dart';
 import 'package:sh_app/screens/profile/profile_screen.dart';
 import 'package:sh_app/screens/search/search_screen.dart';
+import '';
 
 class PersistentTabScreen extends StatefulWidget {
   const PersistentTabScreen({super.key});
@@ -71,11 +73,9 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: const Text(
+        title: Text(
             'second',
-        style: TextStyle(
-          fontWeight: FontWeight.w900,
-        ),),
+        style: Theme.of(context).textTheme.headlineMedium),
         backgroundColor: Colors.red.shade900,
         elevation: 100,
       ),

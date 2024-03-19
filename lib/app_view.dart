@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sh_app/screens/start/start_screen.dart';
+import 'package:sh_app/themes/theme.dart';
 import 'blocs/log_in_bloc/log_in_bloc.dart';
 import 'components/persistent_nav.dart';
 import 'blocs/authentication_bloc/authentication_bloc.dart';
@@ -11,9 +12,9 @@ class MyAppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.red.shade900,
-      ),
+      theme: TAppTheme.lightTheme,
+      // darkTheme: TAppTheme.darkTheme,
+      // themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       title: '2ND',
       home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
@@ -28,8 +29,8 @@ class MyAppView extends StatelessWidget {
           } else {
             return const StartScreen();
           }
-        },
-      ),
+        },),
+      // home: PersistentTabScreen(),
     );
   }
 }
