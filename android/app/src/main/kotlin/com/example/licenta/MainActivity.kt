@@ -1,4 +1,4 @@
-package com.example.sh_app
+package com.example.licenta
 
 import io.flutter.embedding.android.FlutterActivity
 

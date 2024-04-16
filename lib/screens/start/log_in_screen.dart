@@ -28,7 +28,8 @@ class _LogInScreenState extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<LogInBloc, LogInState>(
-      listener: (context, state) { if(state is LogInSuccess) {
+      listener: (context, state) {
+        if(state is LogInSuccess) {
         setState(() {
           signInRequired = false;
         });

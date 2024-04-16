@@ -11,9 +11,8 @@ abstract class LogInState extends Equatable {
 class LogInInitial extends LogInState {}
 
 class LogInSuccess extends LogInState {}
+class LogInProcess extends LogInState {}
 class LogInFailure extends LogInState {
   final String? message;
-
   const LogInFailure({this.message});
 }
-class LogInProcess extends LogInState {}

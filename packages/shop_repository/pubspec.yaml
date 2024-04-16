@@ -1,0 +1,35 @@
+name: shop_repository
+description: Dart package that manages the shop.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  persistent_bottom_nav_bar_v2: ^4.2.8
+  font_awesome_flutter: ^10.7.0
+  equatable: ^2.0.5
+  cupertino_icons: ^1.0.6
+  #Firebase
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.8
+  cloud_firestore: ^4.15.8
+  firebase_storage: ^11.6.9
+  #Bloc
+  flutter_bloc: ^8.1.4
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+
+flutter:
+
+
+  uses-material-design: true

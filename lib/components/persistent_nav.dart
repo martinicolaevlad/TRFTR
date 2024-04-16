@@ -26,7 +26,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
       Search(),
       Favourites(),
       Inbox(),
-      Profile()
+      ProfileScreen()
     ];
   }
 
@@ -72,13 +72,15 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: false,
+        centerTitle: true,
         title: Text(
-            'second',
-        style: Theme.of(context).textTheme.headlineMedium),
+          'TRFTR',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
         backgroundColor: Colors.red.shade900,
         elevation: 100,
       ),
+
       body: PersistentTabView(
         context,
         controller: _controller,

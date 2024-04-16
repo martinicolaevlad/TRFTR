@@ -43,14 +43,14 @@ class _StartScreenState extends State<StartScreen> with TickerProviderStateMixin
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                const Text(
-                  'second',
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20), // Adjust the value for the desired roundness
+                  child: Image.asset(
+                    "assets/2.png",
+                    scale: 5,
                   ),
                 ),
+
                 const SizedBox(height: kToolbarHeight),
                 TabBar(
                     controller: tabController,

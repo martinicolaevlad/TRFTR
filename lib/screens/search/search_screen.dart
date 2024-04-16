@@ -5,12 +5,13 @@ class Search extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
+    return const Scaffold(
+      backgroundColor: Colors.grey,
+      body: Center(
           child: Text(
-              'SEARCH'
+            'SEARCH',
           ),
-        )
+        ),
     );
   }
 }
