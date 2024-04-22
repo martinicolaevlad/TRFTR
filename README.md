@@ -1,16 +1,8 @@
-# licenta
+# TRFTR MOBILE APP
 
-A new Flutter project.
+  The app is designed for the local second-hand clothing stores because they are too underground, and many people don’t know their location. The main reason for that is because the owners are elder people and do not use the internet for promoting their store. The app encourages the people to go, personally to the stores and not to buy online. The app promotes anti-fast-fashion.
+  
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+  It is a mobile app designed in flutter, for android use.
+  Its main purpose is to notify the users when a new drop of clothes arrives at their favourite local thrift-shops.
+  
