@@ -21,7 +21,7 @@ dependencies:
   firebase_storage: ^11.6.9
   #Bloc
   flutter_bloc: ^8.1.4
-
+  uuid: ^4.0.0
 
 dev_dependencies:
   flutter_test:

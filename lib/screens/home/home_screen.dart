@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sh_app/screens/home/detail_screen.dart';
+import 'package:sh_app/screens/search/search_screen.dart';
 import 'package:shop_repository/shop_repository.dart';
 
 import '../../blocs/shop_blocs/get_shop_bloc.dart';
@@ -17,11 +19,10 @@ final List<MarkerItem> markers = [];
 Widget build(BuildContext context) {
   return Padding(
 
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.zero,
 
       child: BlocBuilder<GetShopBloc, GetShopState>(
       builder: (context, state) {
-        log(state.toString());
         if(state is GetShopSuccess){
 
           // Clear existing markers
@@ -49,8 +50,11 @@ Widget build(BuildContext context) {
             items: markers,
             center: LatLng(46.7706315474, 23.6254758254),
             itemContent: (context, index) {
-              MarkerItem item = markers[index];
-              return BottomTile(item: item);
+              var prop = state.props[index];
+              if (prop is MyShop){
+                MyShop item = prop; return BottomTile(item: item);}
+              return const Text('error');
+
             },
           ),
         );
@@ -61,7 +65,7 @@ Widget build(BuildContext context) {
           );
         } else if (state is GetShopFailure) {
           return const Center(
-            child: Text("Error: pula mea"), // Display the error message
+            child: Text("GET SHOP FAILURE"), // Display the error message
           );
         } else {
           return const Center(
@@ -78,51 +82,75 @@ Widget build(BuildContext context) {
 class BottomTile extends StatelessWidget {
   const BottomTile({required this.item});
 
-  final MarkerItem item;
+  final MyShop item;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GetShopBloc, GetShopState>(
-  builder: (context, state) {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          Container(width: 120.0, color: Colors.red,
-                    child: Image.asset('assets/lamajole.png'),),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("${item.id}", style: Theme.of(context).textTheme.headlineSmall),
-                  Text("${item.latitude} , ${item.longitude}", style: Theme.of(context).textTheme.bodySmall),
-                  stars(),
-                  Expanded(
-                    child: Text('Cras et ante metus. Vivamus dignissim augue sit amet nisi volutpat, vitae tincidunt lacus accumsan. '),
-                  )
-                ],
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailScreen(shop: item), // Replace NewScreen with the actual screen class you want to navigate to
               ),
+            );
+          },
+          child: Container(
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 120.0,
+                  color: Colors.red,
+                  child: Image.asset('assets/lamajole.png'),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text("${item.name}", style: Theme.of(context).textTheme.headlineSmall),
+                        Text(
+                          "${(item.openTime / 100).toInt().toString().padLeft(2, '0')}:${(item.openTime % 100).toString().padLeft(2, '0')} - ${(item.closeTime / 100).toInt().toString().padLeft(2, '0')}:${(item.closeTime % 100).toString().padLeft(2, '0')}",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        stars(item),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  },
-);
-  }
-
-  Row stars() {
-    return Row(
-      children: <Widget>[
-        Icon(Icons.star, color: Colors.orangeAccent),
-        Icon(Icons.star, color: Colors.orangeAccent),
-        Icon(Icons.star, color: Colors.orangeAccent),
-        Icon(Icons.star_half, color: Colors.orangeAccent),
-        Icon(Icons.star_border, color: Colors.orangeAccent),
-        SizedBox(width: 3.0),
-        Text('3.5', style: TextStyle(color: Colors.orangeAccent, fontSize: 24.0, fontWeight: FontWeight.w600))
-      ],
+        );
+      },
     );
   }
 }
+
+Row stars(MyShop item) {
+  List<Widget> starIcons = [];
+  int filledStars = item.rating ~/ 1;
+  for (int i = 0; i < filledStars; i++) {
+    starIcons.add(Icon(Icons.star, color: Colors.orangeAccent));
+  }
+  if (item.rating % 1 > 0) {
+    starIcons.add(Icon(Icons.star_half, color: Colors.orangeAccent));
+    filledStars++;
+  }
+  for (int i = filledStars; i < 5; i++) {
+    starIcons.add(Icon(Icons.star_border, color: Colors.orangeAccent));
+  }
+
+  starIcons.add(SizedBox(width: 3.0));
+  starIcons.add(Text(
+    '${item.rating}',
+    style: TextStyle(color: Colors.orangeAccent, fontSize: 24.0, fontWeight: FontWeight.w600),
+  ));
+
+  return Row(children: starIcons);
+}
+
+

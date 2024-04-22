@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sh_app/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
+import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
+import 'package:sh_app/screens/profile/create_shop_screen.dart';
+import 'package:shop_repository/shop_repository.dart';
 import '../../blocs/log_in_bloc/log_in_bloc.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -15,102 +20,111 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final FirebaseShopRepo _shopRepo = FirebaseShopRepo(); // Instantiate FirebaseShopRepo
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<MyUserBloc, MyUserState>(
-      listener: (context, state) {},
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Center(
-            child: Container(
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: 120,
-                    height: 120,
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: const FaIcon(FontAwesomeIcons.userNinja, size: 100),
+    return BlocBuilder<MyUserBloc, MyUserState>(
+      builder: (context, userState) {
+        return BlocBuilder<GetShopBloc, GetShopState>(
+          builder: (context, shopState) {
+            log(userState.toString() + "PULA");
+            if (userState.user!.isOwner == false) {
+              return Scaffold(
+                body: SingleChildScrollView(
+                  child: Center(
+                    child: Container(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          SizedBox(
+                            width: 120,
+                            height: 120,
+                            child: Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: const FaIcon(FontAwesomeIcons.userNinja, size: 100),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          BlocBuilder<MyUserBloc, MyUserState>(
+                            builder: (context, state) {
+                              if (state.user != null && state.user?.name != null) {
+                                return Text(
+                                  state.user!.name,
+                                  style: Theme.of(context).textTheme.displayMedium,
+                                );
+                              } else {
+                                return Text("error");
+                              }
+                            },
+                          ),
+
+                          BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                            builder: (context, state) {
+                              if (state.user != null && state.user?.email != null) {
+                                return Text(
+                                  state.user!.email!,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                );
+                              } else {
+                                return Text("error");
+                              }
+                            }
+                          ),
+
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: 200,
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge),
+                              style: ElevatedButton.styleFrom(
+                                elevation: 3.0,
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          const Divider(),
+                          const SizedBox(height: 10),
+
+                          ProfileMenuWidget(title: "My Bids", icon: FontAwesomeIcons.box, onPress: () {}),
+                          ProfileMenuWidget(title: "Add Money", icon: FontAwesomeIcons.moneyBill, onPress: () {}),
+                          ProfileMenuWidget(title: "Favourite items", icon: FontAwesomeIcons.heart, onPress: () {}),
+                          const Divider(),
+                          const SizedBox(height: 10),
+                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
+                          ProfileMenuWidget(
+                            title: "Log Out",
+                              icon: FontAwesomeIcons.arrowLeft,
+                              onPress: () {
+                                context.read<LogInBloc>().add(LogOutRequired());
+                              },
+                            endIcon: false,
+                            textColor: Colors.red,
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-
-                  BlocBuilder<MyUserBloc, MyUserState>(
-                    builder: (context, state) {
-                      if(state.user != null && state.user?.name != null) {
-                        return Text(
-                          state.user!.name,
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .displayMedium,
-                        );
-                      }else {
-                        return Text("error");
-                      }
-                      },
-                  ),
-
-                   BlocBuilder<AuthenticationBloc, AuthenticationState>(
-                    builder: (context, state) {
-                      if(state.user != null && state.user?.email != null) {
-                        return Text(
-                          state.user!.email!,
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyLarge,
-                        );
-                      }else {
-                        return Text("error");
-                      }
-                      },
-                  ),
-
-
-
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 200,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge),
-                      style: ElevatedButton.styleFrom(
-                        elevation: 3.0,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Divider(),
-                  const SizedBox(height: 10),
-
-                  ProfileMenuWidget(title: "My Bids", icon: FontAwesomeIcons.box, onPress: () {}),
-                  ProfileMenuWidget(title: "Add Money", icon: FontAwesomeIcons.moneyBill, onPress: () {}),
-                  ProfileMenuWidget(title: "Favourite items", icon: FontAwesomeIcons.heart, onPress: () {}),
-                  const Divider(),
-                  const SizedBox(height: 10),
-                  ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
-                  ProfileMenuWidget(
-                    title: "Log Out",
-                    icon: FontAwesomeIcons.arrowLeft,
-                    onPress: () {
-                      context.read<LogInBloc>().add(LogOutRequired());
-                    },
-                    endIcon: false,
-                    textColor: Colors.red,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+                ),
+              );
+            } else {
+              if(userState.user != null) {
+                if (userState.user!.isOwner == true && _shopRepo.getShopByOwnerId(userState.user!.id) != null) {
+                  return CreateShopScreen(userState.user!);
+                }
+              }
+            }
+            return Text('data2');
+          },
+        );
+      },
     );
   }
 }

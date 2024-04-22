@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool obscurePassword = false;
   IconData iconPassword = FontAwesomeIcons.solidEye;
   final nameController = TextEditingController();
-
+  bool? isOwnerBool = false;
   bool signUpRequired = false;
 
   bool containsUpperCase = false;
@@ -228,6 +230,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        value: isOwnerBool,
+                        onChanged: (newValue) {
+                          setState(() {
+                            isOwnerBool = newValue;
+                          });
+                        },
+                      ),
+                      const Text('I want an Owner account.'),
+                    ],
+                  ),
+
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
                   !signUpRequired
                       ? SizedBox(
                     width: MediaQuery.of(context).size.width * 0.5,
@@ -238,8 +257,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             myUser = myUser.copyWith(
                               email: emailController.text,
                               name: nameController.text,
+                              isOwner: isOwnerBool
                             );
-
                             setState(() {
                               context.read<RegisterBloc>().add(
                                   RegisterRequired(

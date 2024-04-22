@@ -23,7 +23,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
   List<Widget> _buildScreens() {
     return [
       Home(),
-      Search(),
+      // Search(),
       Favourites(),
       Inbox(),
       ProfileScreen()
@@ -38,12 +38,12 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
         activeColorPrimary: Colors.red.shade900,
         inactiveColorPrimary: Colors.grey,
       ),
-      PersistentBottomNavBarItem(
-        icon: FaIcon(FontAwesomeIcons.magnifyingGlassDollar),
-        title: "Search",
-        activeColorPrimary: Colors.red.shade900,
-        inactiveColorPrimary: Colors.grey,
-      ),
+      // PersistentBottomNavBarItem(
+      //   icon: FaIcon(FontAwesomeIcons.magnifyingGlassDollar),
+      //   title: "Search",
+      //   activeColorPrimary: Colors.red.shade900,
+      //   inactiveColorPrimary: Colors.grey,
+      // ),
      PersistentBottomNavBarItem(
         icon: FaIcon(FontAwesomeIcons.crown),
         title: "Favourites",

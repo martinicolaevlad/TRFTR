@@ -1,13 +1,29 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:user_repository/src/models/models.dart';
+import 'package:uuid/uuid.dart';
 
 import '../shop_repository.dart';
 
-
 class FirebaseShopRepo implements ShopRepo {
   final shopCollection = FirebaseFirestore.instance.collection('shops');
+
+  Future<MyShop> createShop(MyShop shop) async {
+    try {
+      shop.id = const Uuid().v1();
+
+
+      await shopCollection
+          .doc(shop.id)
+          .set(shop.toEntity().toDocument());
+
+      return shop;
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
 
   @override
   Future<List<MyShop>> getShops() async {
@@ -29,4 +45,21 @@ class FirebaseShopRepo implements ShopRepo {
     }
   }
 
+  @override
+  Future<MyShop?> getShopByOwnerId(String ownerId) async {
+    try {
+      final querySnapshot = await shopCollection.where('ownerId', isEqualTo: ownerId).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        var doc = querySnapshot.docs.first;
+        log('Shop found for owner: ${doc.data()}');
+        return MyShop.fromEntity(MyShopEntity.fromDocument(doc.data()));
+      } else {
+        log('No shop found for ownerId: $ownerId');
+        return null;
+      }
+    } catch (e) {
+      log('Error fetching shop by ownerId $ownerId: ${e.toString()}');
+      rethrow;
+    }
+  }
 }

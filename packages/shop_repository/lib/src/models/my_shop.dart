@@ -5,19 +5,19 @@ import '../../shop_repository.dart';
 
 
 class MyShop extends Equatable {
-  final String id;
-  final String name;
-  final int rating;
-  final String? picture;
-  final DateTime? nextDrop;
-  final DateTime? lastDrop;
-  final String latitude;
-  final String longitude;
-  final int openTime;
-  final int closeTime;
-  final String? ownerId;
+  String id;
+  String name;
+  int rating;
+  String? picture;
+  DateTime? nextDrop;
+  DateTime? lastDrop;
+  String latitude;
+  String longitude;
+  int openTime;
+  int closeTime;
+  String? ownerId;
 
-  const MyShop({
+  MyShop({
     required this.id,
     required this.name,
     required this.rating,
