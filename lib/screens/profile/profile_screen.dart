@@ -8,7 +8,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sh_app/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
+import 'package:sh_app/screens/home/detail_screen.dart';
 import 'package:sh_app/screens/profile/create_shop_screen.dart';
+import 'package:sh_app/screens/profile/shop_profile_screen.dart';
+import 'package:sh_app/screens/profile/user_profile_screen.dart';
 import 'package:shop_repository/shop_repository.dart';
 import '../../blocs/log_in_bloc/log_in_bloc.dart';
 
@@ -26,104 +29,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<MyUserBloc, MyUserState>(
       builder: (context, userState) {
-        return BlocBuilder<GetShopBloc, GetShopState>(
-          builder: (context, shopState) {
-            log(userState.toString() + "PULA");
-            if (userState.user!.isOwner == false) {
-              return Scaffold(
-                body: SingleChildScrollView(
-                  child: Center(
-                    child: Container(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 30),
-                          SizedBox(
-                            width: 120,
-                            height: 120,
-                            child: Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: const FaIcon(FontAwesomeIcons.userNinja, size: 100),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
+        if (userState.user == null) {
+          return Text('Error: No user found!');
+        }
 
-                          BlocBuilder<MyUserBloc, MyUserState>(
-                            builder: (context, state) {
-                              if (state.user != null && state.user?.name != null) {
-                                return Text(
-                                  state.user!.name,
-                                  style: Theme.of(context).textTheme.displayMedium,
-                                );
-                              } else {
-                                return Text("error");
-                              }
-                            },
-                          ),
-
-                          BlocBuilder<AuthenticationBloc, AuthenticationState>(
-                            builder: (context, state) {
-                              if (state.user != null && state.user?.email != null) {
-                                return Text(
-                                  state.user!.email!,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                );
-                              } else {
-                                return Text("error");
-                              }
-                            }
-                          ),
-
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: 200,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge),
-                              style: ElevatedButton.styleFrom(
-                                elevation: 3.0,
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          const Divider(),
-                          const SizedBox(height: 10),
-
-                          ProfileMenuWidget(title: "My Bids", icon: FontAwesomeIcons.box, onPress: () {}),
-                          ProfileMenuWidget(title: "Add Money", icon: FontAwesomeIcons.moneyBill, onPress: () {}),
-                          ProfileMenuWidget(title: "Favourite items", icon: FontAwesomeIcons.heart, onPress: () {}),
-                          const Divider(),
-                          const SizedBox(height: 10),
-                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
-                          ProfileMenuWidget(
-                            title: "Log Out",
-                              icon: FontAwesomeIcons.arrowLeft,
-                              onPress: () {
-                                context.read<LogInBloc>().add(LogOutRequired());
-                              },
-                            endIcon: false,
-                            textColor: Colors.red,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            } else {
-              if(userState.user != null) {
-                if (userState.user!.isOwner == true && _shopRepo.getShopByOwnerId(userState.user!.id) != null) {
-                  return CreateShopScreen(userState.user!);
-                }
+        if (!userState.user!.isOwner) {
+          // User is not an owner, show user profile screen
+          return UserProfileScreen();
+        } else {
+          // User is an owner, manage shop details
+          return FutureBuilder<MyShop?>(
+            future: _shopRepo.getShopByOwnerId(userState.user!.id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.data == null) {
+                // No shop found for the owner, prompt to create a new shop
+                return CreateShopScreen(userState.user!);
+              } else {
+                // Shop found, show details screen
+                return ShopProfileScreen(shop: snapshot.data!);
               }
-            }
-            return Text('data2');
-          },
-        );
+            },
+          );
+        }
       },
     );
   }
