@@ -24,6 +24,8 @@ dependencies:
   firebase_core: ^2.29.0
   firebase_auth: ^4.19.1
   cloud_firestore: ^4.15.8
+  image_picker: ^1.1.1
+  firebase_app_check: ^0.2.2+5
 
   #Bloc
   flutter_bloc: ^8.1.4

@@ -87,6 +87,7 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
 
   @override
   void initState() {
+
     rebuildMarkers(currentIndex);
     super.initState();
   }

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -27,8 +28,7 @@ Widget build(BuildContext context) {
 
           // Clear existing markers
           markers.clear();
-          log(state.props[0].toString());
-          // Add markers from state.props
+
           for (var i = 0; i < state.props.length; i++) {
             var prop = state.props[i];
             if (prop is MyShop) {
@@ -93,7 +93,7 @@ class BottomTile extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DetailScreen(shop: item), // Replace NewScreen with the actual screen class you want to navigate to
+                builder: (context) => DetailScreen(shop: item),
               ),
             );
           },
@@ -101,24 +101,50 @@ class BottomTile extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Container(
+                  height: double.infinity,
                   width: 120.0,
                   color: Colors.red,
-                  child: Image.asset('assets/lamajole.png'),
+                  child: isValidPicture(item.picture)
+                      ? Image.network(
+                    item.picture!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(CupertinoIcons.photo, size: 100),
+                  )
+                      : Icon(CupertinoIcons.photo, size: 100),
                 ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text("${item.name}", style: Theme.of(context).textTheme.headlineSmall),
-                        Text(
-                          "${(item.openTime / 100).toInt().toString().padLeft(2, '0')}:${(item.openTime % 100).toString().padLeft(2, '0')} - ${(item.closeTime / 100).toInt().toString().padLeft(2, '0')}:${(item.closeTime % 100).toString().padLeft(2, '0')}",
-                          style: Theme.of(context).textTheme.bodySmall,
+                    child:
+                    Row(
+                      children: [
+                        SizedBox(width: 4,),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+
+                            Text("${item.name}", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                            Row(
+                              children: [
+                                Text(
+                                  "${(item.openTime / 100).toInt().toString().padLeft(2, '0')}:${(item.openTime % 100).toString().padLeft(2, '0')} - ${(item.closeTime / 100).toInt().toString().padLeft(2, '0')}:${(item.closeTime % 100).toString().padLeft(2, '0')}",
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 10,),
+                                Row(
+                                  children: [
+                                    Icon(Icons.star, color: Colors.orangeAccent,),
+                                    Text("${item.rating}/5", style: TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold),),
+
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Text("${item.details}"),
+                          ],
                         ),
-                        stars(item),
-                      ],
-                    ),
+                    ],
+                  ),
                   ),
                 ),
               ],
@@ -128,29 +154,9 @@ class BottomTile extends StatelessWidget {
       },
     );
   }
+
+  bool isValidPicture(String? url) {
+    return url != null && url.isNotEmpty && Uri.tryParse(url)?.hasAbsolutePath == true;
+  }
 }
-
-Row stars(MyShop item) {
-  List<Widget> starIcons = [];
-  int filledStars = item.rating ~/ 1;
-  for (int i = 0; i < filledStars; i++) {
-    starIcons.add(Icon(Icons.star, color: Colors.orangeAccent));
-  }
-  if (item.rating % 1 > 0) {
-    starIcons.add(Icon(Icons.star_half, color: Colors.orangeAccent));
-    filledStars++;
-  }
-  for (int i = filledStars; i < 5; i++) {
-    starIcons.add(Icon(Icons.star_border, color: Colors.orangeAccent));
-  }
-
-  starIcons.add(SizedBox(width: 3.0));
-  starIcons.add(Text(
-    '${item.rating}',
-    style: TextStyle(color: Colors.orangeAccent, fontSize: 24.0, fontWeight: FontWeight.w600),
-  ));
-
-  return Row(children: starIcons);
-}
-
 

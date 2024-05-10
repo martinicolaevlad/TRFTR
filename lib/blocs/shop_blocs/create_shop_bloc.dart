@@ -23,6 +23,4 @@ class CreateShopBloc extends Bloc<CreateShopEvent, CreateShopState> {
       }
     });
   }
-
-
 }

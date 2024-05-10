@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
@@ -8,6 +9,7 @@ import 'package:sh_app/screens/inbox/inbox_screen.dart';
 import 'package:sh_app/screens/profile/profile_screen.dart';
 import 'package:sh_app/screens/search/search_screen.dart';
 import '';
+import '../blocs/shop_blocs/get_shop_bloc.dart';
 
 class PersistentTabScreen extends StatefulWidget {
   const PersistentTabScreen({super.key});
@@ -44,19 +46,19 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
       //   activeColorPrimary: Colors.red.shade900,
       //   inactiveColorPrimary: Colors.grey,
       // ),
-     PersistentBottomNavBarItem(
+      PersistentBottomNavBarItem(
         icon: FaIcon(FontAwesomeIcons.crown),
         title: "Favourites",
-       activeColorPrimary: Colors.red.shade900,
+        activeColorPrimary: Colors.red.shade900,
         inactiveColorPrimary: Colors.grey,
       ),
-     PersistentBottomNavBarItem(
+      PersistentBottomNavBarItem(
         icon: FaIcon(FontAwesomeIcons.solidBell),
         title: "Inbox",
-       activeColorPrimary: Colors.red.shade900,
+        activeColorPrimary: Colors.red.shade900,
         inactiveColorPrimary: Colors.grey,
       ),
-     PersistentBottomNavBarItem(
+      PersistentBottomNavBarItem(
         icon: FaIcon(FontAwesomeIcons.userSecret),
         title: "Profile",
         activeColorPrimary: Colors.red.shade900,
@@ -64,50 +66,63 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
       ),
     ];
   }
+
   @override
   void initState() {
-    _controller = PersistentTabController(initialIndex: 0);
     super.initState();
+    _controller = PersistentTabController(initialIndex: 0);
+    // Add listener to react on navigation tab change
+    _controller.addListener(() {
+      if (_controller.index == 0) { // Assuming index 0 is the Home tab
+        // Trigger fetching of shops
+        BlocProvider.of<GetShopBloc>(context).add(GetShop());
+      }
+    });
   }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           'TRFTR',
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),
         ),
+
         backgroundColor: Colors.red.shade900,
         elevation: 100,
       ),
-
       body: PersistentTabView(
         context,
         controller: _controller,
         screens: _buildScreens(),
         items: _navBarsItems(),
         confineInSafeArea: true,
-        backgroundColor: Colors.grey.shade300, // Default is Colors.white.
-        handleAndroidBackButtonPress: true, // Default is true.
-        resizeToAvoidBottomInset: true, // This needs to be true if you want to move up the screen when keyboard appears. Default is true.
-        stateManagement: true, // Default is true.
-        hideNavigationBarWhenKeyboardShows: true, // Recommended to set 'resizeToAvoidBottomInset' as true while using this argument. Default is true.
+        backgroundColor: Colors.grey.shade300,
+        handleAndroidBackButtonPress: true,
+        resizeToAvoidBottomInset: true,
+        stateManagement: true,
+        hideNavigationBarWhenKeyboardShows: true,
         decoration: NavBarDecoration(
           borderRadius: BorderRadius.circular(10.0),
           colorBehindNavBar: Colors.white,
         ),
         popAllScreensOnTapOfSelectedTab: true,
         popActionScreens: PopActionScreensType.all,
-        itemAnimationProperties: ItemAnimationProperties( // Navigation Bar's items animation properties.
+        itemAnimationProperties: ItemAnimationProperties(
           duration: Duration(milliseconds: 200),
           curve: Curves.ease,
         ),
-        screenTransitionAnimation: ScreenTransitionAnimation( // Screen transition animation on change of selected tab.
+        screenTransitionAnimation: ScreenTransitionAnimation(
           animateTabTransition: true,
           curve: Curves.ease,
           duration: Duration(milliseconds: 400),
         ),
-        navBarStyle: NavBarStyle.style12, // Choose the nav bar style with this property.
+        navBarStyle: NavBarStyle.style12,
       ),
     );
   }

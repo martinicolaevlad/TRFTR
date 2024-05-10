@@ -10,10 +10,9 @@ import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:sh_app/screens/home/detail_screen.dart';
 import 'package:sh_app/screens/profile/create_shop_screen.dart';
-import 'package:sh_app/screens/profile/shop_profile_screen.dart';
-import 'package:sh_app/screens/profile/user_profile_screen.dart';
 import 'package:shop_repository/shop_repository.dart';
 import '../../blocs/log_in_bloc/log_in_bloc.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -23,42 +22,163 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final FirebaseShopRepo _shopRepo = FirebaseShopRepo(); // Instantiate FirebaseShopRepo
+  final FirebaseShopRepo _shopRepo = FirebaseShopRepo();
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MyUserBloc, MyUserState>(
       builder: (context, userState) {
-        if (userState.user == null) {
-          return Text('Error: No user found!');
-        }
+        return BlocBuilder<GetShopBloc, GetShopState>(
+            builder: (context, shopState) {
+              return Scaffold(
+                body: SingleChildScrollView(
+                  child: Center(
+                    child: Container(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          SizedBox(
+                            width: 120,
+                            height: 120,
+                            child: Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: const FaIcon(FontAwesomeIcons.userNinja, size: 100),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
 
-        if (!userState.user!.isOwner) {
-          // User is not an owner, show user profile screen
-          return UserProfileScreen();
-        } else {
-          // User is an owner, manage shop details
-          return FutureBuilder<MyShop?>(
-            future: _shopRepo.getShopByOwnerId(userState.user!.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (snapshot.data == null) {
-                // No shop found for the owner, prompt to create a new shop
-                return CreateShopScreen(userState.user!);
-              } else {
-                // Shop found, show details screen
-                return ShopProfileScreen(shop: snapshot.data!);
+                          BlocBuilder<MyUserBloc, MyUserState>(
+                            builder: (context, state) {
+                              if (state.user != null && state.user?.name != null) {
+                                return Text(
+                                  state.user!.name,
+                                  style: Theme.of(context).textTheme.displayMedium,
+                                );
+                              } else {
+                                return Text("error");
+                              }
+                            },
+                          ),
+
+                          BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                              builder: (context, state) {
+                                if (state.user != null && state.user?.email != null) {
+                                  return Text(
+                                    state.user!.email!,
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  );
+                                } else {
+                                  return Text("error");
+                                }
+                              }
+                          ),
+
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: BlocBuilder<MyUserBloc, MyUserState>(
+                              builder: (context, state) {
+                                if (state.user != null) { // Check if the user object is not null
+                                  if (state.user!.isOwner) { // Check if the user is an owner
+                                    // User is an owner, show both buttons
+                                    return Row(
+                                      children: [
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(right: 4.0), // Adjust the padding as needed
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                // Handle the press event for editing p rofile
+                                              },
+                                              child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white)),
+                                              style: ElevatedButton.styleFrom(
+                                                elevation: 3.0,
+                                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                                foregroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 4.0), // Adjust the padding as needed
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.of(context).push(MaterialPageRoute(
+                                                    builder: (_) => CreateShopScreen(state.user!))); // Navigate to the CreateShopScreen
+                                              },
+                                              child: Text("My Shop", style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white)),
+                                              style: ElevatedButton.styleFrom(
+                                                elevation: 3.0,
+                                                backgroundColor: Theme.of(context).colorScheme.primary, // Different color for distinction
+                                                foregroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    // User is not an owner, show only the "Edit Profile" button
+                                    return ElevatedButton(
+                                      onPressed: () {
+                                        // Handle the press event for editing profile
+                                      },
+                                      child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge),
+                                      style: ElevatedButton.styleFrom(
+                                        elevation: 3.0,
+                                        backgroundColor: Theme.of(context).colorScheme.primary,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                                      ),
+                                    );
+                                  }
+                                } else {
+                                  return Text("User data not available", style: Theme.of(context).textTheme.bodyLarge); // Fallback text if user data is not available
+                                }
+                              },
+                            ),
+                          )
+                          ,
+
+                          const SizedBox(height: 10),
+                          const Divider(),
+                          const SizedBox(height: 10),
+
+                          ProfileMenuWidget(title: "My Bids", icon: FontAwesomeIcons.box, onPress: () {}),
+                          ProfileMenuWidget(title: "Add Money", icon: FontAwesomeIcons.moneyBill, onPress: () {}),
+                          ProfileMenuWidget(title: "Favourite items", icon: FontAwesomeIcons.heart, onPress: () {}),
+                          const Divider(),
+                          const SizedBox(height: 10),
+                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
+                          ProfileMenuWidget(
+                            title: "Log Out",
+                            icon: FontAwesomeIcons.arrowLeft,
+                            onPress: () {
+                              context.read<LogInBloc>().add(LogOutRequired());
+                            },
+                            endIcon: false,
+                            textColor: Colors.red,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
               }
-            },
-          );
-        }
+
+        );
       },
     );
   }
 }
+
+
 
 class ProfileMenuWidget extends StatelessWidget {
   const ProfileMenuWidget({
