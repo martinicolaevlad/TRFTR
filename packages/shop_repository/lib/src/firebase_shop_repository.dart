@@ -78,6 +78,24 @@ class FirebaseShopRepo implements ShopRepo {
   }
 
   @override
+  Future<MyShop?> getShopById(String id) async {
+    try {
+      final querySnapshot = await shopCollection.where('id', isEqualTo: id).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        var doc = querySnapshot.docs.first;
+        log('Shop found for owner: ${doc.data()}');
+        return MyShop.fromEntity(MyShopEntity.fromDocument(doc.data()));
+      } else {
+        log('No shop found for id: $id');
+        return null;
+      }
+    } catch (e) {
+      log('Error fetching shop by ownerId $id: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> updateShopDetails(String shopId, {String? name, int? rating, String? picture, DateTime? nextDrop, DateTime? lastDrop, String? latitude, String? longitude, int? openTime, int? closeTime, String? ownerId, String? details}) async {
     try {
       var updateData = <String, dynamic>{};

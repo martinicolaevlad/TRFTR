@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../blocs/my_user_bloc/my_user_bloc.dart';
 import '../../blocs/shop_blocs/create_shop_bloc.dart';
 
+import '../../blocs/shop_blocs/get_shop_bloc.dart';
 import '../../blocs/shop_blocs/update_shop_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -418,11 +419,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
           ownerId: widget.myUser.id,
           details: shop!.details
         ));
+
       } else {
         log("i am here");
         BlocProvider.of<CreateShopBloc>(context).add(CreateShop(shop!));
       }
-
+      BlocProvider.of<GetShopBloc>(context).add(GetShop());
       Navigator.of(context).pop();
     }).catchError((error) {
       showErrorDialog("Error accessing shop data: $error");

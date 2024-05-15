@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:sh_app/screens/home/detail_screen.dart';
-import 'package:sh_app/screens/search/search_screen.dart';
 import 'package:shop_repository/shop_repository.dart';
 
 import '../../blocs/shop_blocs/get_shop_bloc.dart';
@@ -80,78 +80,87 @@ Widget build(BuildContext context) {
 }
 
 class BottomTile extends StatelessWidget {
-  const BottomTile({required this.item});
-
   final MyShop item;
+
+  const BottomTile({Key? key, required this.item}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GetShopBloc, GetShopState>(
-      builder: (context, state) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailScreen(shop: item),
-              ),
-            );
-          },
-          child: Container(
-            child: Row(
-              children: <Widget>[
-                Container(
-                  height: double.infinity,
-                  width: 120.0,
-                  color: Colors.red,
-                  child: isValidPicture(item.picture)
-                      ? Image.network(
-                    item.picture!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Icon(CupertinoIcons.photo, size: 100),
-                  )
-                      : Icon(CupertinoIcons.photo, size: 100),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child:
-                    Row(
-                      children: [
-                        SizedBox(width: 4,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
+    return BlocBuilder<MyUserBloc, MyUserState>(
+      builder: (context, userState) {
+          return GestureDetector(
+            onTap: () {
+              if (userState.user != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailScreen(shop: item, user: userState.user!),
+                  ),
+                );
+              } else {
+                // Optionally handle the case where user is null before navigating
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("User information not available"))
+                );
+              }
+            },
+            child: buildShopTile(context, item),
+          );
 
-                            Text("${item.name}", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                            Row(
-                              children: [
-                                Text(
-                                  "${(item.openTime / 100).toInt().toString().padLeft(2, '0')}:${(item.openTime % 100).toString().padLeft(2, '0')} - ${(item.closeTime / 100).toInt().toString().padLeft(2, '0')}:${(item.closeTime % 100).toString().padLeft(2, '0')}",
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(width: 10,),
-                                Row(
-                                  children: [
-                                    Icon(Icons.star, color: Colors.orangeAccent,),
-                                    Text("${item.rating}/5", style: TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold),),
+      },
+    );
+  }
 
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Text("${item.details}"),
-                          ],
-                        ),
+  Widget buildShopTile(BuildContext context, MyShop item) {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Container(
+            height: double.infinity,
+            width: 120.0,
+            color: Colors.red,
+            child: isValidPicture(item.picture)
+                ? Image.network(
+              item.picture!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(CupertinoIcons.photo, size: 100),
+            )
+                : Icon(CupertinoIcons.photo, size: 100),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  SizedBox(width: 4,),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text("${item.name}", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          Text(
+                            "${(item.openTime / 100).toInt().toString().padLeft(2, '0')}:${(item.openTime % 100).toString().padLeft(2, '0')} - ${(item.closeTime / 100).toInt().toString().padLeft(2, '0')}:${(item.closeTime % 100).toString().padLeft(2, '0')}",
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(width: 10,),
+                          Row(
+                            children: [
+                              Icon(Icons.star, color: Colors.orangeAccent,),
+                              Text("${item.rating}/5", style: TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Text("${item.details}"),
                     ],
                   ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

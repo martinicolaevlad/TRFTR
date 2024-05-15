@@ -3,14 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
+import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:sh_app/screens/favourites/favourites_screen.dart';
 import 'package:sh_app/screens/home/home_screen.dart';
 import 'package:sh_app/screens/inbox/inbox_screen.dart';
 import 'package:sh_app/screens/profile/profile_screen.dart';
-import 'package:sh_app/screens/search/search_screen.dart';
-import '';
 import '../blocs/shop_blocs/get_shop_bloc.dart';
-
+import '../blocs/favorite_bloc/favorite_bloc.dart';
 class PersistentTabScreen extends StatefulWidget {
   const PersistentTabScreen({super.key});
 
@@ -25,7 +24,6 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
   List<Widget> _buildScreens() {
     return [
       Home(),
-      // Search(),
       Favourites(),
       Inbox(),
       ProfileScreen()
@@ -40,14 +38,8 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
         activeColorPrimary: Colors.red.shade900,
         inactiveColorPrimary: Colors.grey,
       ),
-      // PersistentBottomNavBarItem(
-      //   icon: FaIcon(FontAwesomeIcons.magnifyingGlassDollar),
-      //   title: "Search",
-      //   activeColorPrimary: Colors.red.shade900,
-      //   inactiveColorPrimary: Colors.grey,
-      // ),
       PersistentBottomNavBarItem(
-        icon: FaIcon(FontAwesomeIcons.crown),
+        icon: FaIcon(FontAwesomeIcons.solidHeart),
         title: "Favourites",
         activeColorPrimary: Colors.red.shade900,
         inactiveColorPrimary: Colors.grey,
@@ -59,7 +51,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
-        icon: FaIcon(FontAwesomeIcons.userSecret),
+        icon: FaIcon(FontAwesomeIcons.solidUser),
         title: "Profile",
         activeColorPrimary: Colors.red.shade900,
         inactiveColorPrimary: Colors.grey,
@@ -70,14 +62,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = PersistentTabController(initialIndex: 0);
-    // Add listener to react on navigation tab change
-    _controller.addListener(() {
-      if (_controller.index == 0) { // Assuming index 0 is the Home tab
-        // Trigger fetching of shops
-        BlocProvider.of<GetShopBloc>(context).add(GetShop());
-      }
-    });
+
   }
 
   @override
@@ -87,7 +72,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
         centerTitle: true,
         title: Text(
           'TRFTR',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold
           ),
@@ -114,7 +99,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
         popAllScreensOnTapOfSelectedTab: true,
         popActionScreens: PopActionScreensType.all,
         itemAnimationProperties: ItemAnimationProperties(
-          duration: Duration(milliseconds: 200),
+          duration: Duration(milliseconds: 400),
           curve: Curves.ease,
         ),
         screenTransitionAnimation: ScreenTransitionAnimation(

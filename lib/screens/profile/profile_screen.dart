@@ -76,85 +76,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
 
                           const SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: BlocBuilder<MyUserBloc, MyUserState>(
-                              builder: (context, state) {
-                                if (state.user != null) { // Check if the user object is not null
-                                  if (state.user!.isOwner) { // Check if the user is an owner
-                                    // User is an owner, show both buttons
-                                    return Row(
-                                      children: [
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(right: 4.0), // Adjust the padding as needed
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                // Handle the press event for editing p rofile
-                                              },
-                                              child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white)),
-                                              style: ElevatedButton.styleFrom(
-                                                elevation: 3.0,
-                                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                                foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(left: 4.0), // Adjust the padding as needed
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.of(context).push(MaterialPageRoute(
-                                                    builder: (_) => CreateShopScreen(state.user!))); // Navigate to the CreateShopScreen
-                                              },
-                                              child: Text("My Shop", style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white)),
-                                              style: ElevatedButton.styleFrom(
-                                                elevation: 3.0,
-                                                backgroundColor: Theme.of(context).colorScheme.primary, // Different color for distinction
-                                                foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  } else {
-                                    // User is not an owner, show only the "Edit Profile" button
-                                    return ElevatedButton(
-                                      onPressed: () {
-                                        // Handle the press event for editing profile
-                                      },
-                                      child: Text("Edit Profile", style: Theme.of(context).textTheme.bodyLarge),
-                                      style: ElevatedButton.styleFrom(
-                                        elevation: 3.0,
-                                        backgroundColor: Theme.of(context).colorScheme.primary,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                                      ),
-                                    );
-                                  }
-                                } else {
-                                  return Text("User data not available", style: Theme.of(context).textTheme.bodyLarge); // Fallback text if user data is not available
-                                }
-                              },
-                            ),
-                          )
-                          ,
+
+
 
                           const SizedBox(height: 10),
                           const Divider(),
                           const SizedBox(height: 10),
 
-                          ProfileMenuWidget(title: "My Bids", icon: FontAwesomeIcons.box, onPress: () {}),
-                          ProfileMenuWidget(title: "Add Money", icon: FontAwesomeIcons.moneyBill, onPress: () {}),
-                          ProfileMenuWidget(title: "Favourite items", icon: FontAwesomeIcons.heart, onPress: () {}),
+                          ProfileMenuWidget(title: "Edit Profile", icon: FontAwesomeIcons.box, onPress: () {}),
+                          if (context.read<MyUserBloc>().state.user!.isOwner)
+                            ProfileMenuWidget(title: "My Shop", icon: FontAwesomeIcons.moneyBill, onPress: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => CreateShopScreen(context.read<MyUserBloc>().state.user!))); // Navigate to the CreateShopScreen
+                            }),
+                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.heart, onPress: () {}),
                           const Divider(),
                           const SizedBox(height: 10),
-                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
                           ProfileMenuWidget(
                             title: "Log Out",
                             icon: FontAwesomeIcons.arrowLeft,
