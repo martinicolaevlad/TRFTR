@@ -1,5 +1,5 @@
-name: shop_repository
-description: Dart package that manages the shop.
+name: rating_repository
+description: Dart package that manages the ratings.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -33,4 +33,3 @@ flutter:
 
 
   uses-material-design: true
-

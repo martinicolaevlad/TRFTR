@@ -22,6 +22,7 @@ class UpdateShop extends UpdateShopEvent {
   final int? closeTime;
   final String? ownerId;
   final String? details;
+  final int? ratingsCount;
 
   const UpdateShop({
     required this.shopId,
@@ -35,9 +36,10 @@ class UpdateShop extends UpdateShopEvent {
     this.openTime,
     this.closeTime,
     this.ownerId,
-    this.details
+    this.details,
+    this.ratingsCount
   });
 
   @override
-  List<Object?> get props => [shopId, name, rating, picture, nextDrop, lastDrop, latitude, longitude, openTime, closeTime, ownerId, details];
+  List<Object?> get props => [shopId, name, rating, picture, nextDrop, lastDrop, latitude, longitude, openTime, closeTime, ownerId, details, ratingsCount];
 }

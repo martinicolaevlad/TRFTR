@@ -47,7 +47,6 @@ class _FavouritesState extends State<Favourites> {
               itemCount: state.favorites.length,
               itemBuilder: (context, index) {
                 final favorite = state.favorites[index];
-                log(favorite.toString());
                 return FutureBuilder<MyShop?>(
                   future: _shopRepo.getShopById(favorite.shopId),
                   builder: (context, snapshot) {
@@ -59,7 +58,6 @@ class _FavouritesState extends State<Favourites> {
                       return Center(child: Text('Shop not found'));
                     }
                     final shop = snapshot.data!;
-                    log(shop.toString());
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(

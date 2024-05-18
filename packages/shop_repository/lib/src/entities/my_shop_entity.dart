@@ -14,6 +14,7 @@ class MyShopEntity extends Equatable {
   final int closeTime; // Store close time as an integer (e.g., 1700 for 5:00 PM)
   final String? ownerId;
   final String? details; // Additional details about the shop
+  final int ratingsCount;
 
   const MyShopEntity({
     required this.id,
@@ -28,6 +29,7 @@ class MyShopEntity extends Equatable {
     required this.closeTime,
     this.ownerId,
     this.details,
+    required this.ratingsCount
   });
 
   Map<String, Object?> toDocument() {
@@ -36,14 +38,15 @@ class MyShopEntity extends Equatable {
       'name': name,
       'rating': rating,
       'picture': picture,
-      'nextDrop': nextDrop?.toIso8601String(),
-      'lastDrop': lastDrop?.toIso8601String(),
+      'nextDrop': nextDrop,
+      'lastDrop': lastDrop,
       'latitude': latitude,
       'longitude': longitude,
       'openTime': openTime,
       'closeTime': closeTime,
       'ownerId': ownerId,
       'details': details,
+      'ratingsCount': ratingsCount
     };
   }
 
@@ -61,12 +64,13 @@ class MyShopEntity extends Equatable {
       closeTime: (doc['closeTime'] ?? 0) as int,
       ownerId: doc['ownerId'] as String?,
       details: doc['details'] as String?,
+        ratingsCount: doc['ratingsCount'] as int
     );
   }
 
   @override
   List<Object?> get props => [
-    id, name, rating, picture, nextDrop, lastDrop, latitude, longitude, openTime, closeTime, ownerId, details
+    id, name, rating, picture, nextDrop, lastDrop, latitude, longitude, openTime, closeTime, ownerId, details, ratingsCount
   ];
 
   @override
@@ -83,7 +87,8 @@ class MyShopEntity extends Equatable {
       openTime: $openTime,
       closeTime: $closeTime,
       ownerId: $ownerId,
-      details: $details
+      details: $details,
+      ratingsCount: $ratingsCount
     }''';
   }
 }

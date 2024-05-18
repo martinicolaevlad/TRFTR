@@ -31,11 +31,6 @@ class FirebaseShopRepo implements ShopRepo {
   Future<List<MyShop>> getShops() async {
     try {
       final querySnapshot = await shopCollection.get();
-
-      // Log the data retrieved from Firestore
-      for (final doc in querySnapshot.docs) {
-        log('Shop Document: ${doc.data()}');
-      }
       return await shopCollection
           .get()
           .then((value) => value.docs.map((e) =>
@@ -50,9 +45,7 @@ class FirebaseShopRepo implements ShopRepo {
   @override
   Stream<List<MyShop>> getShopsStream() {
     return shopCollection.snapshots().map((snapshot) {
-      log("Snapshot received with ${snapshot.docs.length} documents.");
       return snapshot.docs.map((doc) {
-        log('Shop Document: ${doc.data()}');  // Log each shop document
         return MyShop.fromEntity(MyShopEntity.fromDocument(doc.data()));
       }).toList();
     });
@@ -65,7 +58,6 @@ class FirebaseShopRepo implements ShopRepo {
       final querySnapshot = await shopCollection.where('ownerId', isEqualTo: ownerId).get();
       if (querySnapshot.docs.isNotEmpty) {
         var doc = querySnapshot.docs.first;
-        log('Shop found for owner: ${doc.data()}');
         return MyShop.fromEntity(MyShopEntity.fromDocument(doc.data()));
       } else {
         log('No shop found for ownerId: $ownerId');
@@ -83,7 +75,6 @@ class FirebaseShopRepo implements ShopRepo {
       final querySnapshot = await shopCollection.where('id', isEqualTo: id).get();
       if (querySnapshot.docs.isNotEmpty) {
         var doc = querySnapshot.docs.first;
-        log('Shop found for owner: ${doc.data()}');
         return MyShop.fromEntity(MyShopEntity.fromDocument(doc.data()));
       } else {
         log('No shop found for id: $id');
@@ -96,7 +87,7 @@ class FirebaseShopRepo implements ShopRepo {
   }
 
   @override
-  Future<void> updateShopDetails(String shopId, {String? name, int? rating, String? picture, DateTime? nextDrop, DateTime? lastDrop, String? latitude, String? longitude, int? openTime, int? closeTime, String? ownerId, String? details}) async {
+  Future<void> updateShopDetails(String shopId, {String? name, int? rating, String? picture, DateTime? nextDrop, DateTime? lastDrop, String? latitude, String? longitude, int? openTime, int? closeTime, String? ownerId, String? details, int? ratingsCount}) async {
     try {
       var updateData = <String, dynamic>{};
       if (name != null) updateData['name'] = name;
@@ -110,6 +101,7 @@ class FirebaseShopRepo implements ShopRepo {
       if (closeTime != null) updateData['closeTime'] = closeTime;
       if (ownerId != null) updateData['ownerId'] = ownerId;
       if (details != null) updateData['details'] = details;
+      if (ratingsCount != null) updateData['ratingsCount'] = ratingsCount;
 
       await shopCollection.doc(shopId).update(updateData);
       log('Shop updated successfully: $shopId');
@@ -143,6 +135,7 @@ class FirebaseShopRepo implements ShopRepo {
       rethrow;
     }
   }
+
 
 
 

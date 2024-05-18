@@ -17,6 +17,7 @@ class MyShop extends Equatable {
   int closeTime;
   String? ownerId;
   String? details;
+  int ratingsCount;
 
   MyShop({
     required this.id,
@@ -30,7 +31,8 @@ class MyShop extends Equatable {
     required this.openTime,
     required this.closeTime,
     this.ownerId,
-    this.details
+    this.details,
+    required this.ratingsCount
   });
 
   static final empty = MyShop(
@@ -45,7 +47,8 @@ class MyShop extends Equatable {
       openTime: 0,
       closeTime: 0,
       ownerId: '',
-      details: ''
+      details: '',
+      ratingsCount: 0
   );
 
   MyShop copyWith({
@@ -60,7 +63,8 @@ class MyShop extends Equatable {
     int? openTime,
     int? closeTime,
     String? ownerId,
-    String? details
+    String? details,
+    int? ratingsCount
   }) {
     return MyShop(
       id: id ?? this.id,
@@ -74,7 +78,8 @@ class MyShop extends Equatable {
       openTime: openTime ?? this.openTime,
       closeTime: closeTime ?? this.closeTime,
       ownerId: ownerId ?? this.ownerId,
-      details: details ?? this.details
+      details: details ?? this.details,
+        ratingsCount: ratingsCount ?? this.ratingsCount
     );
   }
 
@@ -95,7 +100,8 @@ class MyShop extends Equatable {
       openTime: openTime,
       closeTime: closeTime,
       ownerId: ownerId,
-      details: details
+      details: details,
+        ratingsCount: ratingsCount
     );
   }
 
@@ -112,10 +118,11 @@ class MyShop extends Equatable {
       openTime: entity.openTime,
       closeTime: entity.closeTime,
       ownerId: entity.ownerId,
-      details: entity.details
+      details: entity.details,
+        ratingsCount: entity.ratingsCount
     );
   }
 
   @override
-  List<Object?> get props => [id, name, rating, picture, nextDrop, lastDrop, latitude, longitude, openTime, closeTime, ownerId, details];
+  List<Object?> get props => [id, name, rating, picture, nextDrop, lastDrop, latitude, longitude, openTime, closeTime, ownerId, details, ratingsCount];
 }

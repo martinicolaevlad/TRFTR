@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
-import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
+
 import 'package:sh_app/screens/favourites/favourites_screen.dart';
 import 'package:sh_app/screens/home/home_screen.dart';
 import 'package:sh_app/screens/inbox/inbox_screen.dart';
@@ -62,7 +61,7 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
   @override
   void initState() {
     super.initState();
-
+    _controller = PersistentTabController(initialIndex: 0);
   }
 
   @override

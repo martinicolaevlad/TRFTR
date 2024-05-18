@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:favorite_repository/favorite_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rating_repository/rating_repository.dart';
 import 'package:sh_app/blocs/favorite_bloc/favorite_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/create_shop_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:sh_app/screens/start/start_screen.dart';
 import 'package:sh_app/themes/theme.dart';
 import 'package:shop_repository/shop_repository.dart';
 import 'blocs/log_in_bloc/log_in_bloc.dart';
+import 'blocs/rating_bloc/rating_bloc.dart';
 import 'blocs/register_bloc/register_bloc.dart';
 import 'blocs/shop_blocs/update_shop_bloc.dart';
 import 'components/persistent_nav.dart';
@@ -59,7 +61,10 @@ class MyAppView extends StatelessWidget {
                   create: (context) => UpdateShopBloc(shopRepo: FirebaseShopRepo())
                 ),
               BlocProvider(create: (context) => FavoritesBloc(favoritesRepo: FirebaseFavoriteRepo()),
+                ),
+              BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo()),
                 )
+
             ] ,
            child: const PersistentTabScreen());
       }else{

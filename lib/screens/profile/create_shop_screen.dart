@@ -74,8 +74,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     setState(() {
       _imagePath = image.path;
       _pictureController.text = _imagePath!;
-      log(_pictureController.text + "asta i _pictureController in pickImage");
-      log(_pictureController.text);
     });
 
   }
@@ -102,8 +100,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     _longitudeController.text = shop?.longitude ?? '';
     _nextDropController.text = shop?.nextDrop != null ? DateFormat('dd.MM.yyyy').format(shop!.nextDrop!) : '';
     _imagePath = shop!.picture.toString() ?? '';
-    log(_imagePath! + "asta i _pictureController in fillForm");
-
     _detailsController.text = shop!.details ?? '';
 
   }
@@ -417,11 +413,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
           openTime: shop!.openTime,
           closeTime: shop!.closeTime,
           ownerId: widget.myUser.id,
-          details: shop!.details
+          details: shop!.details,
+          rating: shop!.rating,
+          ratingsCount: shop!.ratingsCount
         ));
 
       } else {
-        log("i am here");
         BlocProvider.of<CreateShopBloc>(context).add(CreateShop(shop!));
       }
       BlocProvider.of<GetShopBloc>(context).add(GetShop());
@@ -458,9 +455,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 }
-
-
-
 
 
 class DateInputWidget extends StatefulWidget {

@@ -26,7 +26,7 @@ dependencies:
   cloud_firestore: ^4.15.8
   image_picker: ^1.1.1
   firebase_app_check: ^0.2.2+5
-
+  firebase_messaging: ^14.9.2
   #Bloc
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5
@@ -44,6 +44,8 @@ dependencies:
     path: packages/shop_repository
   favorite_repository:
     path: packages/favorite_repository
+  rating_repository:
+    path: packages/rating_repository
 
   #Maps
   interactive_maps_marker: ^0.0.2

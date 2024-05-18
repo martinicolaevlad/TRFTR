@@ -1,0 +1,1 @@
+export 'rating_entity.dart';

@@ -28,7 +28,8 @@ class UpdateShopBloc extends Bloc<UpdateShopEvent, UpdateShopState> {
           openTime: event.openTime,
           closeTime: event.closeTime,
           ownerId: event.ownerId,
-          details: event.details
+          details: event.details,
+            ratingsCount: event.ratingsCount
         );
         emit(UpdateShopSuccess(updatedShop));
       } catch (e) {
