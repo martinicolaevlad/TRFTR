@@ -3,8 +3,10 @@ import 'dart:developer';
 import 'package:favorite_repository/favorite_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notification_repository/notification_repository.dart';
 import 'package:rating_repository/rating_repository.dart';
 import 'package:sh_app/blocs/favorite_bloc/favorite_bloc.dart';
+import 'package:sh_app/blocs/notification_bloc/notification_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/create_shop_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:sh_app/screens/home/detail_screen.dart';
@@ -49,22 +51,18 @@ class MyAppView extends StatelessWidget {
                       myUserId: context.read<AuthenticationBloc>().state.user!.uid
                   )),
                 ),
-                BlocProvider(
-                  create: (context) => GetShopBloc(
-                      FirebaseShopRepo()
-                  )..add(GetShop()),
+                BlocProvider(create: (context) => GetShopBloc(FirebaseShopRepo())..add(GetShop()),
                 ),
-                BlocProvider(
-                  create: (context) => CreateShopBloc(shopRepo: FirebaseShopRepo())
+                BlocProvider(create: (context) => CreateShopBloc(shopRepo: FirebaseShopRepo())
                 ),
-              BlocProvider(
-                  create: (context) => UpdateShopBloc(shopRepo: FirebaseShopRepo())
-                ),
-              BlocProvider(create: (context) => FavoritesBloc(favoritesRepo: FirebaseFavoriteRepo()),
-                ),
-              BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo()),
-                )
-
+                BlocProvider(create: (context) => UpdateShopBloc(shopRepo: FirebaseShopRepo())
+                  ),
+                BlocProvider(create: (context) => FavoritesBloc(favoritesRepo: FirebaseFavoriteRepo()),
+                  ),
+                BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo()),
+                  ),
+                BlocProvider(create: (context) => NotificationBloc(notificationRepo: FirebaseNotificationRepo())
+                  )
             ] ,
            child: const PersistentTabScreen());
       }else{

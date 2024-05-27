@@ -135,7 +135,12 @@ class _DetailScreenState extends State<DetailScreen> {
                         "Hours: ${formatTime(widget.shop.openTime)} - ${formatTime(widget.shop.closeTime)}",
                         style: const TextStyle(fontSize: 18.0, color: Colors.grey),
                       ),
-                      if (widget.shop.nextDrop != null) Text(
+                      if (widget.shop.nextDrop == widget.shop.lastDrop)
+                        const Text(
+                        'Next Drop: Coming Soon',
+                        style: TextStyle(fontSize: 16.0),
+                        ),
+                      if (widget.shop.nextDrop != widget.shop.lastDrop) Text(
                         'Next Drop: ${formatDate(widget.shop.nextDrop!)}',
                         style: const TextStyle(fontSize: 16.0),
                       ),

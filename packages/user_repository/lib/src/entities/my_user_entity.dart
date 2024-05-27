@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:equatable/equatable.dart';
 
 class MyUserEntity extends Equatable {
@@ -7,6 +5,7 @@ class MyUserEntity extends Equatable {
   String email;
   String name;
   String? picture;
+  String? fcmToken;
   bool isOwner;
 
   MyUserEntity({
@@ -14,8 +13,8 @@ class MyUserEntity extends Equatable {
     required this.email,
     required this.name,
     this.picture,
-    required this.isOwner
-
+    this.fcmToken,
+    required this.isOwner,
   });
 
   Map<String, Object?> toDocument() {
@@ -24,6 +23,7 @@ class MyUserEntity extends Equatable {
       'email': email,
       'name': name,
       'picture': picture,
+      'fcmToken': fcmToken,
       'isOwner' : isOwner,
     };
   }
@@ -34,20 +34,22 @@ class MyUserEntity extends Equatable {
         email: doc['email'] as String,
         name: doc['name'] as String,
         picture: doc['picture'] as String?,
+        fcmToken: doc['fcmToken'] as String?,
         isOwner: doc['isOwner'] as bool
     );
   }
 
   @override
-  List<Object?> get props => [id, email, name, picture, isOwner];
+  List<Object?> get props => [id, email, name, picture, fcmToken, isOwner];
 
   @override
   String toString() {
     return '''UserEntity: {
-      id: $id
-      email: $email
-      name: $name
-      picture: $picture
+      id: $id,
+      email: $email,
+      name: $name,
+      picture: $picture,
+      fcmToken: $fcmToken,
       isOwner: $isOwner
     }''';
   }

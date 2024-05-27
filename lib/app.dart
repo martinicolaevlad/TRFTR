@@ -6,11 +6,14 @@ import 'package:sh_app/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:user_repository/user_repository.dart';
 
 import 'app_view.dart';
+import 'components/messaging.dart';
 import 'firebase_options.dart';
 
 class MainApp extends StatelessWidget {
   final UserRepository userRepository;
+
   const MainApp(this.userRepository, {super.key});
+
   // const MainApp({super.key});
 
   @override
