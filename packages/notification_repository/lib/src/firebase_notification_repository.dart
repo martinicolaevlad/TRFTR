@@ -7,13 +7,17 @@ class FirebaseNotificationRepo implements NotificationRepo {
   final notificationsCollection = FirebaseFirestore.instance.collection('notifications');
 
   @override
-  Future<List<MyNotification>> getNotificationsByUserId(String userId) async {
-    try {
-      var querySnapshot = await notificationsCollection.where('userId', isEqualTo: userId).get();
-      return querySnapshot.docs.map((doc) => MyNotification.fromEntity(NotificationEntity.fromDocument(doc.data()))).toList();
-    } catch (e) {
-      log('Error retrieving notifications for $userId: ${e.toString()}');
-      rethrow;
-    }
+  Stream<List<MyNotification>> getNotificationsByUserId(String userId) {
+    return notificationsCollection
+        .where('userId', isEqualTo: userId)
+        .orderBy('time', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) =>
+          MyNotification.fromEntity(NotificationEntity.fromDocument(doc.data()))
+      ).toList();
+    });
   }
+
 }
+

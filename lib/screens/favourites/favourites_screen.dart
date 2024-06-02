@@ -30,11 +30,13 @@ class _FavouritesState extends State<Favourites> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade300,
       appBar: AppBar(
         title: Center(child: Text("Favourites", style: Theme.of(context).textTheme.headlineMedium?.copyWith(
         color: Colors.black,
         fontWeight: FontWeight.bold)),
-      ),),
+      ),
+      backgroundColor: Colors.white,),
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
           if (state is FavoritesLoading) {

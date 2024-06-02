@@ -28,7 +28,9 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
           event.ratingId,
             userId: event.userId,
             shopId: event.shopId,
-            rating: event.rating
+            rating: event.rating,
+            review: event.review,
+            time: event.time
         );
         emit(RatingSuccess(rating));
       } catch (e) {
@@ -45,6 +47,9 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
         emit(RatingFailure());
       }
     });
+
+
+
     on<GetRatingsByShopId>((event, emit) async {
         emit(RatingLoading());
         try {

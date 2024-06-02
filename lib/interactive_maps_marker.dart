@@ -53,9 +53,20 @@ class InteractiveMapsMarker extends StatefulWidget {
     readIcons();
   }
 
-  void readIcons() async {
-    if (markerIcon == null) markerIcon = await getBytesFromAsset('assets/marker.png', 100);
-    if (markerIconSelected == null) markerIconSelected = await getBytesFromAsset('assets/marker_selected.png', 100);
+  Future<void> readIcons() async {
+    Completer<void> completer = Completer();
+    try {
+      if (markerIcon == null) {
+        markerIcon = await getBytesFromAsset('assets/location.png', 120);
+      }
+      if (markerIconSelected == null) {
+        markerIconSelected = await getBytesFromAsset('assets/location_selected.png', 120);
+      }
+      completer.complete(); // Mark as complete if everything is successful
+    } catch (e) {
+      completer.completeError(e); // Propagate errors
+    }
+    return completer.future;
   }
 
   Uint8List? markerIcon;
@@ -82,9 +93,16 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
   @override
   void initState() {
     super.initState();
-    pageController.addListener(_onPageViewScroll);
-    rebuildMarkers(currentIndex);
+    widget.readIcons().then((_) {
+      pageController.addListener(_onPageViewScroll);
+      rebuildMarkers(currentIndex);
+    }).catchError((error) {
+      // Optionally handle errors, such as showing a dialog or a snackbar
+      print('Failed to load icons: $error');
+    });
   }
+
+
 
   @override
   void dispose() {
@@ -142,7 +160,7 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
           builder: (context, value, child) {
             print('Values changed');
             return GoogleMap(
-              zoomControlsEnabled: true,
+              zoomControlsEnabled: false,
               markers: markers,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
@@ -194,7 +212,7 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
           markerId: MarkerId(item.id.toString()),
           position: LatLng(item.latitude, item.longitude),
           onTap: () => setIndex(widget.items.indexOf(item)),
-          icon: BitmapDescriptor.defaultMarkerWithHue(item.id == current ? BitmapDescriptor.hueGreen : BitmapDescriptor.hueRed),
+          icon: BitmapDescriptor.fromBytes(item.id == current ? widget.markerIconSelected! : widget.markerIcon!),
         ),
       );
     });
@@ -204,6 +222,7 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
       selectedMarker.value = current;
     });
   }
+
 
   void setIndex(int index){
     pageController.animateToPage(

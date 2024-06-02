@@ -18,13 +18,6 @@ class FirebaseUserRepository implements UserRepository {
   final usersCollection = FirebaseFirestore.instance.collection('users');
 
   @override
-  Stream<User?> get user {
-    return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      return firebaseUser;
-    });
-  }
-
-  @override
   Future<MyUser> signUp(MyUser myUser, String password) async {
     try {
       UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -42,6 +35,23 @@ class FirebaseUserRepository implements UserRepository {
       log(e.toString());
       rethrow;
     }
+  }
+
+  @override
+  Future<void> setUserData(MyUser user) async {
+    try {
+      await usersCollection.doc(user.id).set(user.toEntity().toDocument());
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  @override
+  Stream<User?> get user {
+    return _firebaseAuth.authStateChanges().map((firebaseUser) {
+      return firebaseUser;
+    });
   }
 
   @override
@@ -90,15 +100,6 @@ class FirebaseUserRepository implements UserRepository {
     }
   }
 
-  @override
-  Future<void> setUserData(MyUser user) async {
-    try {
-      await usersCollection.doc(user.id).set(user.toEntity().toDocument());
-    } catch (e) {
-      log(e.toString());
-      rethrow;
-    }
-  }
 
   @override
   Future<MyUser> getMyUser(String myUserId) async {

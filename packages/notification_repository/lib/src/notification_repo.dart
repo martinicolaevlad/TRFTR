@@ -2,5 +2,5 @@ import 'models/models.dart'; // Ensure this path imports the Notification model 
 
 abstract class NotificationRepo {
 
-  Future<List<MyNotification>> getNotificationsByUserId(String userId);
+  Stream<List<MyNotification>> getNotificationsByUserId(String userId);
 }

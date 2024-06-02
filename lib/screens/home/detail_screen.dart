@@ -9,6 +9,7 @@ import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/update_shop_bloc.dart';
 import 'package:sh_app/screens/home/rating_widget.dart';
 import 'package:shop_repository/shop_repository.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:favorite_repository/favorite_repository.dart';
 
@@ -47,6 +48,7 @@ class _DetailScreenState extends State<DetailScreen> {
     _ratingRepo = FirebaseRatingRepo();
     _checkFavoriteStatus();
     fetchAndDisplayRating();
+    context.read<RatingBloc>().add(GetRatingsByShopId(widget.shop.id));
   }
 
   void fetchAndDisplayRating() async {
@@ -79,9 +81,13 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade300,
+
       appBar: AppBar(
         centerTitle: true,
-        title: Text(widget.shop.name, style: Theme.of(context).textTheme.displaySmall),
+        title: Text(widget.shop.name, style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold)),
         leading: Row(
           children: [
             IconButton(
@@ -111,6 +117,7 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Container(
                 height: 300,
                 decoration: BoxDecoration(
+                  border: Border(top: BorderSide(width: 1, color: Colors.grey.shade400), bottom: BorderSide(width: 1, color: Colors.grey.shade400),),
                   image: DecorationImage(
                     fit: BoxFit.cover,
                     image: isValidPicture(widget.shop.picture)
@@ -121,86 +128,115 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(5.0),
               child: Row(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Rating: ${displayedRating}',
-                        style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "${formatTime(widget.shop.openTime)} - ${formatTime(widget.shop.closeTime)}",
+                                style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 20),
+                              Text(
+                                '${displayedRating}/5',
+                                style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
+                              ),
+                              const Icon(Icons.star_rounded, size: 30, color: Colors.orangeAccent)
+                            ],
+                          ),
+                          if (widget.shop.nextDrop == widget.shop.lastDrop)
+                            const Text(
+                            'Next Drop: Coming Soon',
+                            style: TextStyle(fontSize: 16.0),
+                            ),
+                          if (widget.shop.nextDrop != widget.shop.lastDrop) Text(
+                            'Next Drop: ${formatDate(widget.shop.nextDrop!)}',
+                            style: const TextStyle(fontSize: 20.0),
+                          ),
+                          if (widget.shop.lastDrop != null) Text(
+                            'Last Drop: ${formatDate(widget.shop.lastDrop!)}',
+                            style: const TextStyle(fontSize: 20.0),
+                          ),
+                        ],
                       ),
-                      Text(
-                        "Hours: ${formatTime(widget.shop.openTime)} - ${formatTime(widget.shop.closeTime)}",
-                        style: const TextStyle(fontSize: 18.0, color: Colors.grey),
-                      ),
-                      if (widget.shop.nextDrop == widget.shop.lastDrop)
-                        const Text(
-                        'Next Drop: Coming Soon',
-                        style: TextStyle(fontSize: 16.0),
-                        ),
-                      if (widget.shop.nextDrop != widget.shop.lastDrop) Text(
-                        'Next Drop: ${formatDate(widget.shop.nextDrop!)}',
-                        style: const TextStyle(fontSize: 16.0),
-                      ),
-                      if (widget.shop.lastDrop != null) Text(
-                        'Last Drop: ${formatDate(widget.shop.lastDrop!)}',
-                        style: const TextStyle(fontSize: 16.0),
-                      ),
-                    ],
+                    ),
                   ),
-                  Spacer(),
                   SizedBox(width: 8),
 
-              FloatingActionButton(
-                onPressed: () {
-                  try {
-                    final updateShopBloc = BlocProvider.of<UpdateShopBloc>(context);
-                    final getShopBloc = BlocProvider.of<GetShopBloc>(context);
-                    final ratingBloc = BlocProvider.of<RatingBloc>(context);
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext dialogContext) {
-                          return MultiBlocProvider(
-                            providers: [
-                              BlocProvider.value(
-                                value: updateShopBloc,
-                              ),
-                              BlocProvider.value(
-                                value: getShopBloc,
-                              ),
-                              BlocProvider.value(
-                                value: ratingBloc,
-                              )
-                            ],
-                            child: Dialog(
-                              child: RatingInputWidget(
-                                starsController: _ratingController,
-                                hintText: "Rate the shop",
-                                shop: widget.shop,
-                                user: widget.user,
-                                  onRatingChanged: (selectedStars) async {
-                                  _updateAverageRating(widget.shop.id);
-                                  }
-                              ),
-                            ),
+              Column(
+                children: [
+                  Container(
+                    width: 120,
+                    height: 40,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        try {
+                          final updateShopBloc = BlocProvider.of<UpdateShopBloc>(context);
+                          final getShopBloc = BlocProvider.of<GetShopBloc>(context);
+                          final ratingBloc = BlocProvider.of<RatingBloc>(context);
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider.value(
+                                      value: updateShopBloc,
+                                    ),
+                                    BlocProvider.value(
+                                      value: getShopBloc,
+                                    ),
+                                    BlocProvider.value(
+                                      value: ratingBloc,
+                                    )
+                                  ],
+                                  child: Dialog(
+                                    child: RatingInputWidget(
+                                      starsController: _ratingController,
+                                      hintText: "0",
+                                      shop: widget.shop,
+                                      user: widget.user,
+                                        onRatingChanged: (selectedStars) async {
+                                        _updateAverageRating(widget.shop.id);
+                                        }
+                                    ),
+                                  ),
+                                );
+                              }
                           );
+                        } catch (e) {
+                          log('Bloc is not available in the current context: $e');
                         }
-                    );
-                  } catch (e) {
-                    log('Bloc is not available in the current context: $e');
-                  }
-                },
-                backgroundColor: Colors.orangeAccent,
-                heroTag: 'rating_button',
-                child: Icon(_ratingController.text != '0' ? Icons.star_border : Icons.star),
+                      },
+                      backgroundColor: Colors.red.shade900,
+                      heroTag: 'rating_button',
+                      child: Text("Rate & review", style: TextStyle(color: Colors.white),),
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Container(
+                      width: 120,
+                      height: 40,
+                      child: FloatingActionButton(
+                        onPressed: () => _launchGoogleMaps(widget.shop.latitude, widget.shop.longitude),
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.directions),
+                      )
+                  )
+                ],
               )
 
 
               ],
               ),
             ),
+
           ],
         ),
       ),
@@ -262,6 +298,14 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  void _launchGoogleMaps(String lat, String long) async {
+    String googleMapsUrl = "https://www.google.com/maps/dir/?api=1&destination=$lat,$long&travelmode=driving";
 
+    if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
+      await launchUrl(Uri.parse(googleMapsUrl));
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
 
 }

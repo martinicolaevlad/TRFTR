@@ -21,7 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  bool obscurePassword = false;
+  bool obscurePassword = true;
   IconData iconPassword = FontAwesomeIcons.solidEye;
   final nameController = TextEditingController();
   bool? isOwnerBool = false;

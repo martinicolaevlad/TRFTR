@@ -131,8 +131,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("My Shop", style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        backgroundColor: Colors.grey.shade300,
+
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            title: Text("My Shop", style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold
         ),),
         centerTitle: true
@@ -174,6 +177,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
           controller: _nameController,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
+            filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+            fillColor: Colors.white, // Set the
             hintText: "type here",
             border: OutlineInputBorder(),
             enabledBorder: OutlineInputBorder(
@@ -191,6 +196,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         DateInputWidget(
           controller: _nextDropController,
           hintText: "Next Drop",
+
         ),
         SizedBox(height: 10),
         Text("Details:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
@@ -201,6 +207,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
             MaxLinesTextInputFormatter(2),
           ],
           decoration: InputDecoration(
+            filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+            fillColor: Colors.white, // Set the fill color to light blue
             hintText: "type here",
             border: OutlineInputBorder(),
             enabledBorder: OutlineInputBorder(
@@ -286,6 +294,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     TextField(
                       controller: _latitudeController,
                         decoration: InputDecoration(
+                          filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+                          fillColor: Colors.white, // Set the
                           border: OutlineInputBorder(),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -307,6 +317,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     TextField(
                       controller: _longitudeController,
                         decoration: InputDecoration(
+                          filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+                          fillColor: Colors.white, // Set the
                           border: OutlineInputBorder(),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -508,6 +520,8 @@ class _DateInputWidgetState extends State<DateInputWidget> {
         }
       },
       decoration: InputDecoration(
+        filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+        fillColor: Colors.white, // Set the
         hintText: widget.controller.text.isNotEmpty
             ? widget.controller.text
             : widget.hintText, // Hint text for the text field
@@ -571,6 +585,8 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
         }
       },
       decoration: InputDecoration(
+        filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+        fillColor: Colors.white, // Set the
         hintText: widget.controller.text.isNotEmpty
             ? widget.controller.text
             : widget.hintText, // Hint text for the text field

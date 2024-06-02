@@ -45,8 +45,9 @@ class _LogInScreenState extends State<LogInScreen> {
       }
       },
       child: Form(
-          key: _formKey,
+        key: _formKey,
           child: Column(
+
             children: [
               SizedBox(height: 20),
               SizedBox(
@@ -73,9 +74,11 @@ class _LogInScreenState extends State<LogInScreen> {
                     }
                 ),
               ),
+              const SizedBox(height: 10),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: MyTextField(
+
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: obscurePassword,

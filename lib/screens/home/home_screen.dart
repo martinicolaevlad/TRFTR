@@ -38,7 +38,7 @@ class _HomeState extends State<Home> {
                 double parsedLongitude = double.tryParse(prop.longitude) ?? 0.0;
                 markers.add(
                   MarkerItem(
-                    id: prop.hashCode, // Using hashcode as unique id
+                    id: prop.hashCode,
                     latitude: parsedLatitude,
                     longitude: parsedLongitude,
                   ),
@@ -131,7 +131,8 @@ class BottomTile extends StatelessWidget {
               );
             }
           },
-          child: buildShopTile(context, item),
+          child: Container(
+              child: buildShopTile(context, item)),
         );
       },
     );
@@ -141,10 +142,11 @@ class BottomTile extends StatelessWidget {
     return Container(
       child: Row(
         children: <Widget>[
+
           Container(
             height: double.infinity,
             width: 120.0,
-            color: Colors.red,
+            color: Colors.red.shade900,
             child: isValidPicture(item.picture)
                 ? Image.network(
               item.picture!,
@@ -155,6 +157,7 @@ class BottomTile extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
+
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [

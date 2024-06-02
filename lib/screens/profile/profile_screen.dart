@@ -31,6 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return BlocBuilder<GetShopBloc, GetShopState>(
             builder: (context, shopState) {
               return Scaffold(
+                backgroundColor: Colors.grey.shade300,
+
                 body: SingleChildScrollView(
                   child: Center(
                     child: Container(
@@ -54,7 +56,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               if (state.user != null && state.user?.name != null) {
                                 return Text(
                                   state.user!.name,
-                                  style: Theme.of(context).textTheme.displayMedium,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 40),
                                 );
                               } else {
                                 return Text("error");
@@ -83,13 +87,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const Divider(),
                           const SizedBox(height: 10),
 
-                          ProfileMenuWidget(title: "Edit Profile", icon: FontAwesomeIcons.box, onPress: () {}),
+                          ProfileMenuWidget(title: "Edit Profile", icon: FontAwesomeIcons.user, onPress: () {}),
                           if (context.read<MyUserBloc>().state.user!.isOwner)
-                            ProfileMenuWidget(title: "My Shop", icon: FontAwesomeIcons.moneyBill, onPress: () {
+                            ProfileMenuWidget(title: "My Shop", icon: FontAwesomeIcons.store, onPress: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (_) => CreateShopScreen(context.read<MyUserBloc>().state.user!))); // Navigate to the CreateShopScreen
                             }),
-                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.heart, onPress: () {}),
+                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
                           const Divider(),
                           const SizedBox(height: 10),
                           ProfileMenuWidget(

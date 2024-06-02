@@ -50,8 +50,10 @@ class _StartScreenState extends State<StartScreen> with TickerProviderStateMixin
                     scale: 5,
                   ),
                 ),
+                const SizedBox(height: 15),
 
-                const SizedBox(height: kToolbarHeight),
+                const Text("Welcome to TRFTR!",style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),),
+                const SizedBox(height: 10),
                 TabBar(
                     controller: tabController,
                     unselectedLabelColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),

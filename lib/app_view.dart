@@ -61,7 +61,7 @@ class MyAppView extends StatelessWidget {
                   ),
                 BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo()),
                   ),
-                BlocProvider(create: (context) => NotificationBloc(notificationRepo: FirebaseNotificationRepo())
+                BlocProvider(create: (context) => NotificationBloc(notificationRepo: FirebaseNotificationRepo(),)..add(LoadNotifications(context.read<AuthenticationBloc>().state.user!.uid)),
                   )
             ] ,
            child: const PersistentTabScreen());

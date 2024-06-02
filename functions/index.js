@@ -44,13 +44,30 @@ exports.todayDropDailyNotification = functions.pubsub.schedule('* */1 * * *')
           const message = {
             notification: {
               title: `${shopData.name} drops TODAY!`,
-              body: `New items are waiting for you after ${hour}:${minute < 10 ? '0' + minute : minute}`
+              body: `New items are waiting for you after ${hour}:${minute < 10 ? '0' + minute : minute}.`
             },
             token: user.fcmToken,
           };
 
-          const response = await admin.messaging().send(message);
-          console.log('Successfully sent message:', response);
+          try {
+            const response = await admin.messaging().send(message);
+            console.log('Successfully sent message:', response);
+
+            const notifications = admin.firestore().collection('notifications');
+            await notifications.add({
+              text: `${shopData.name} drops TODAY! Opens at ${hour}:${minute < 10 ? '0' + minute : minute}.`,
+              userId: user.id,
+              shopId: shopId,
+              time: admin.firestore.FieldValue.serverTimestamp(),
+              isSensitive: true,
+              seen: false
+            });
+
+            return response;
+          } catch (error) {
+            console.error('Failed to send notification:', error);
+            return null;
+          }
         }
       });
 
@@ -116,8 +133,25 @@ exports.tomorrowNextDrop = functions.pubsub.schedule('0 18 * * *') // Runs every
             token: user.fcmToken,
           };
 
-          const response = await admin.messaging().send(message);
-          console.log('Successfully sent message:', response);
+          try {
+              const response = await admin.messaging().send(message);
+              console.log('Successfully sent message:', response);
+
+              const notifications = admin.firestore().collection('notifications');
+              await notifications.add({
+                text: `${shopData.name} drops tomorrow!`,
+                userId: user.id,
+                shopId: shopId,
+                time: admin.firestore.FieldValue.serverTimestamp(),
+                isSensitive: true,
+                seen: false
+              });
+
+              return response;
+            } catch (error) {
+              console.error('Failed to send notification:', error);
+              return null;
+            }
         }
       });
 
@@ -217,8 +251,86 @@ exports.notifyShopOwnerOnFavorite = functions.firestore
 
         const notifications = admin.firestore().collection('notifications');
         await notifications.add({
-          text: `${userName} just added your shop to their favorites!`,
-          userId: ownerId
+          text: `New favourites add: ${userName}`,
+          userId: ownerId,
+          shopId: '',
+          time: admin.firestore.FieldValue.serverTimestamp(),
+          isSensitive: false,
+          seen: false
+        });
+
+        return response;
+      } catch (error) {
+        console.error('Failed to send notification:', error);
+        return null;
+      }
+    } else {
+      console.log('No FCM token available for shop owner');
+      return null;
+    }
+  });
+
+exports.notifyShopOwnerOnRating = functions.firestore
+  .document('ratings/{ratingId}')
+  .onCreate(async (snap, context) => {
+    const ratingData = snap.data();
+    const shopId = ratingData.shopId;
+    const userId = ratingData.userId;
+
+    const shopRef = admin.firestore().collection('shops').doc(shopId);
+    const shopSnap = await shopRef.get();
+
+    if (!shopSnap.exists) {
+      console.log('Shop not found!');
+      return null;
+    }
+
+    const shopData = shopSnap.data();
+    const ownerId = shopData.ownerId;
+
+    const userRef = admin.firestore().collection('users').doc(userId);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      console.log('User data not found!');
+      return null;
+    }
+
+    const userData = userSnap.data();
+    const userName = userData.name;
+    const rating = ratingData.rating;
+    const ownerRef = admin.firestore().collection('users').doc(ownerId);
+    const ownerSnap = await ownerRef.get();
+
+    if (!ownerSnap.exists) {
+      console.log('Shop owner not found!');
+      return null;
+    }
+
+    const ownerData = ownerSnap.data();
+    const ownerToken = ownerData.fcmToken;
+
+    if (ownerToken) {
+      const message = {
+        notification: {
+          title: 'New Rating!',
+          body: `${userName} just rated your shop with ${rating} stars.`
+        },
+        token: ownerToken
+      };
+
+      try {
+        const response = await admin.messaging().send(message);
+        console.log('Successfully sent message:', response);
+
+        const notifications = admin.firestore().collection('notifications');
+        await notifications.add({
+          text: `${rating} stars from ${userName}.`,
+          userId: ownerId,
+          shopId: '',
+          time: admin.firestore.FieldValue.serverTimestamp(),
+          isSensitive: false,
+          seen: false
         });
 
         return response;

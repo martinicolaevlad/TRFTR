@@ -8,7 +8,7 @@ class TAppTheme {
       scaffoldBackgroundColor: Colors.white60 ,
       brightness: Brightness.light,
       textTheme: TTextTheme.lightTextTheme,
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.red.shade900)
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.red.shade800)
   );
 
 
@@ -17,7 +17,7 @@ class TAppTheme {
 
       brightness: Brightness.dark,
       textTheme: TTextTheme.darkTextTheme,
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.red.shade900)
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.red.shade800)
 
   );
 }

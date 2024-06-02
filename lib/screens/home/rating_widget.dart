@@ -1,6 +1,7 @@
 
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rating_repository/rating_repository.dart';
@@ -36,6 +37,7 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
   late final MyUser user;
   late final MyShop shop;
   int _selectedStars = 0;
+  TextEditingController _selectedReview = TextEditingController();
   Rating? rating;
   final FirebaseRatingRepo _ratingRepo = FirebaseRatingRepo();
   _RatingInputWidgetState(this.user, this.shop);
@@ -64,6 +66,7 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
       setState(() {
         rating = fetchedRating;
         _selectedStars = fetchedRating.rating;
+        _selectedReview.text = fetchedRating.review;
         _fillStars();
       });
     }
@@ -74,7 +77,7 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
       icon: Icon(
         _selectedStars > index ? Icons.star : Icons.star_border,
         color: Colors.orangeAccent,
-        size: 40,
+        size: 30,
       ),
       onPressed: () {
         setState(() {
@@ -106,9 +109,14 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
 
   bool _validateInputs() {
     if (_selectedStars == 0) {
-      showErrorDialog('Please enter the shop name.');
+      showErrorDialog('Please touch a star.');
       return false;
     }
+    if (_selectedReview == '') {
+      showErrorDialog('Please type a review.');
+      return false;
+    }
+
     return true;
   }
 
@@ -118,36 +126,16 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
     }
 
     _ratingRepo.getRating(widget.user.id, widget.shop.id).then((existingRating) {
-      log("Inainte:");
-      log("rating" +shop.rating.toString());
-      log("counter" +shop.ratingsCount.toString());
 
       if (existingRating != null) {
-        // int oldRating = existingRating.rating;
         BlocProvider.of<RatingBloc>(context).add(UpdateRating(
             ratingId: existingRating.id,
             userId: existingRating.userId,
             shopId: existingRating.shopId,
-            rating: _selectedStars
+            rating: _selectedStars,
+            review: _selectedReview.text,
+            time: DateTime.now()
         ));
-
-        // var updateShop = UpdateShop(
-        //     shopId: shop.id,
-        //     name: shop.name,
-        //     latitude: shop.latitude,
-        //     longitude: shop.longitude,
-        //     nextDrop: shop.nextDrop,
-        //     openTime: shop.openTime,
-        //     closeTime: shop.closeTime,
-        //     ownerId: user.id,
-        //     details: shop.details,
-        //     rating: modifyRating(
-        //         shop.rating, shop.ratingsCount, oldRating),
-        //     ratingsCount: shop.ratingsCount
-        // );
-        // BlocProvider.of<UpdateShopBloc>(context).add(updateShop);
-        // BlocProvider.of<GetShopBloc>(context).add(GetShop());
-
 
       } else {
 
@@ -156,7 +144,9 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
                 id: "0",
                 userId: user.id,
                 shopId: shop.id,
-                rating: _selectedStars
+                rating: _selectedStars,
+                review: _selectedReview.text,
+                time: DateTime.now()
             )));
         BlocProvider.of<UpdateShopBloc>(context).add(UpdateShop(
             shopId: shop.id,
@@ -181,49 +171,80 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: _fillStars()
+              ),
+            ),
+            Text(
+              "${widget.starsController.text.isNotEmpty
+                  ? widget.starsController.text
+                  : rating != null ? rating!.rating : widget.hintText}/5",
+              style: const TextStyle(color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        SizedBox(height: 5),
+        Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: _fillStars(),
+          child: TextField(
+            controller: _selectedReview,
+            maxLength: 150,
+            keyboardType: TextInputType.multiline,
+            maxLines: 6,
+            minLines: 1,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              hintText: "type here your review",
+              border: OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.grey),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
           ),
         ),
-        Text(
-          "${widget.starsController.text.isNotEmpty
-              ? widget.starsController.text
-              : rating != null ? rating!.rating : widget.hintText}/5",
-          style: const TextStyle(color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
-        ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(width: 20),
-              Flexible(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _saveRatingDetails();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 36),
+               Container(
+                 width: 120,
+                 height: 40,
+                 child: FloatingActionButton(
+                    onPressed: () {
+                      _saveRatingDetails();
+                      Navigator.of(context).pop();
+                    },
+                   backgroundColor: Colors.red.shade900,
+                   heroTag: 'rating_button',
+                   child: const Text("Save", style: TextStyle(color: Colors.white),),
                   ),
-                  child: const Text('Rate'),
-                ),
-              ),
+               ),
               const SizedBox(width: 5),
-              Flexible(
-                child: ElevatedButton(
+              Container(
+                width: 120,
+                height: 40,
+                child: FloatingActionButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 36),
-                  ),
-                  child: const Text('Cancel'),
+                  backgroundColor: Colors.white,
+                  heroTag: 'rating_button',
+                  child: Text("Cancel", style: TextStyle(color: Colors.red.shade900),),
                 ),
               ),
               const SizedBox(width: 20),

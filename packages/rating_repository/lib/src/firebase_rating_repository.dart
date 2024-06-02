@@ -20,7 +20,9 @@ class FirebaseRatingRepo implements RatingRepo {
           id: id,
           userId: rating.userId,
           shopId: rating.shopId,
-          rating: rating.rating
+          rating: rating.rating,
+          review: rating.review,
+          time: rating.time
       );
       await ratingsCollection.doc(id).set(newRating.toEntity().toDocument());
       log('Rating added: ${newRating.toString()}');
@@ -32,12 +34,14 @@ class FirebaseRatingRepo implements RatingRepo {
   }
 
   @override
-  Future<void> updateRating(String ratingId, {String? userId, String? shopId, int? rating}) async {
+  Future<void> updateRating(String ratingId, {String? userId, String? shopId, int? rating, String? review, DateTime? time}) async {
     try {
       var updateData = <String, dynamic>{};
       if (rating != null) updateData['rating'] = rating;
       if (userId != null) updateData['userId'] = userId;
       if (shopId != null) updateData['shopId'] = shopId;
+      if (review != null) updateData['review'] = review;
+      if (time != null) updateData['time'] = time;
 
       await ratingsCollection.doc(ratingId).update(updateData);
       log('Rating updated successfully: $ratingId');

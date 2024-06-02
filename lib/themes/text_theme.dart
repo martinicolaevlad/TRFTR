@@ -9,7 +9,7 @@ class TTextTheme {
         color: Colors.black87,
       ),
       displayMedium: GoogleFonts.roboto(
-        color: Colors.red.shade900,
+        color: Colors.red.shade800,
 
       )
   );
