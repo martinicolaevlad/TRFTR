@@ -343,3 +343,41 @@ exports.notifyShopOwnerOnRating = functions.firestore
       return null;
     }
   });
+
+exports.updateShopRating = functions.firestore
+  .document('ratings/{ratingId}')
+  .onWrite(async (change, context) => {
+    const ratingData = change.after.data();
+    const shopId = ratingData.shopId;
+
+    const shopRef = admin.firestore().collection('shops').doc(shopId);
+    const shopSnap = await shopRef.get();
+
+    if (!shopSnap.exists) {
+      console.log('Shop not found!');
+      return null;
+    }
+
+    const ratingsRef = admin.firestore().collection('ratings');
+    const ratingsQuery = ratingsRef.where('shopId', '==', shopId);
+    const ratingSnapshots = await ratingsQuery.get();
+
+    let totalRating = 0;
+    let ratingCount = 0;
+
+    ratingSnapshots.forEach(doc => {
+      const ratingData = doc.data();
+      totalRating += ratingData.rating;
+      ratingCount++;
+    });
+
+    const averageRating = ratingCount > 0 ? totalRating / ratingCount : 0;
+
+    return shopRef.update({ rating: averageRating,
+        }).then(() => {
+            console.log(`Updated shop ${shopId} rating to ${averageRating}.`);
+        }).catch((error) => {
+            console.error(`Failed to update shop ${shopId}:`, error);
+        });;
+
+  });

@@ -14,6 +14,7 @@ import 'package:sh_app/screens/home/home_screen.dart';
 import 'package:sh_app/screens/start/start_screen.dart';
 import 'package:sh_app/themes/theme.dart';
 import 'package:shop_repository/shop_repository.dart';
+import 'package:user_repository/user_repository.dart';
 import 'blocs/log_in_bloc/log_in_bloc.dart';
 import 'blocs/rating_bloc/rating_bloc.dart';
 import 'blocs/register_bloc/register_bloc.dart';
@@ -59,7 +60,7 @@ class MyAppView extends StatelessWidget {
                   ),
                 BlocProvider(create: (context) => FavoritesBloc(favoritesRepo: FirebaseFavoriteRepo()),
                   ),
-                BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo()),
+                BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo(), userRepo: FirebaseUserRepository())
                   ),
                 BlocProvider(create: (context) => NotificationBloc(notificationRepo: FirebaseNotificationRepo(),)..add(LoadNotifications(context.read<AuthenticationBloc>().state.user!.uid)),
                   )

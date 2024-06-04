@@ -17,7 +17,7 @@ class SortButtonsWidget extends StatefulWidget {
 }
 
 class _SortButtonsWidgetState extends State<SortButtonsWidget> {
-  String _selectedSort = 'Newest';
+  String _selectedSort = 'newest';
   late final MyShop shop;
 
   _SortButtonsWidgetState(this.shop); // Default selected sort
@@ -32,9 +32,9 @@ class _SortButtonsWidgetState extends State<SortButtonsWidget> {
             alignment: MainAxisAlignment.center, // Center the buttons within the button bar
             buttonPadding: EdgeInsets.symmetric(horizontal: 5), // Spacing between the buttons
             children: <Widget>[
-              buildSortButton('Newest'),
-              buildSortButton('Best'),
-              buildSortButton('Worst'),
+              buildSortButton('newest'),
+              buildSortButton('best'),
+              buildSortButton('worst'),
             ],
           ),
         ],
@@ -48,16 +48,22 @@ class _SortButtonsWidgetState extends State<SortButtonsWidget> {
       onPressed: () {
         setState(() {
           _selectedSort = title;
-          if(_selectedSort == "Newest"){
-            context.read<RatingBloc>().add(LoadRatings(widget.shop.id));
+          if(_selectedSort == "newest"){
+            context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'newest'));
+          }
+          if(_selectedSort == "best"){
+            context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'best'));
+          }
+          if(_selectedSort == "worst"){
+            context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'worst'));
           }
         });
       },
       child: Text(title),
       style: ElevatedButton.styleFrom(
-        foregroundColor: isActive ? Colors.white : Colors.red.shade900,
+        foregroundColor: isActive ? Colors.white : Colors.black,
         backgroundColor: isActive ? Colors.red.shade900 : Colors.white,
-        side: BorderSide(color: Colors.red.shade900, width: 2), // Border color and width
+        side: BorderSide(color: Colors.red.shade900, width: 1), // Border color and width
         padding: EdgeInsets.symmetric(vertical: 4.0), // Adjust vertical padding
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0), // Adjust border radius if needed

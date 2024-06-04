@@ -52,14 +52,15 @@ class RefreshRating extends RatingEvent{
 
 class LoadRatings extends RatingEvent{
   final String shopId;
-  const LoadRatings(this.shopId);
+  final String orderBy;
+  const LoadRatings(this.shopId, this.orderBy);
 }
 
 class UpdateRatings extends RatingEvent{
-  final List<Rating> ratings;
-  UpdateRatings(this.ratings);
+  final List<RatingWithUser> ratingsWithUsers;
+  UpdateRatings(this.ratingsWithUsers);
   @override
-  List<Object> get props => [ratings];
+  List<Object> get props => [ratingsWithUsers];
 }
 
 class GetRatingsByShopId extends RatingEvent {

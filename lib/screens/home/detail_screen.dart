@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rating_repository/rating_repository.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
@@ -36,8 +37,6 @@ class _DetailScreenState extends State<DetailScreen> {
   late final FavoriteRepo _favoriteRepo;
   late final ShopRepo _shopRepo;
   late final RatingRepo _ratingRepo;
-  late int displayedRating = 0;
-
 
   @override
   void initState() {
@@ -46,16 +45,9 @@ class _DetailScreenState extends State<DetailScreen> {
     _shopRepo = FirebaseShopRepo();
     _ratingRepo = FirebaseRatingRepo();
     _checkFavoriteStatus();
-    fetchAndDisplayRating();
-    context.read<RatingBloc>().add(LoadRatings(widget.shop.id));
+    context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'newest'));
   }
 
-  void fetchAndDisplayRating() async {
-    int newRating = 5;
-    setState(() {
-      displayedRating = newRating;
-    });
-  }
 
   Future<void> _checkFavoriteStatus() async {
     var favorite = await _favoriteRepo.getFavorite(widget.user.id, widget.shop.id);
@@ -131,24 +123,42 @@ class _DetailScreenState extends State<DetailScreen> {
                   child: Center(
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              '${displayedRating}/5',
-                              style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
-                            ),
-                            const Icon(Icons.star_rounded, size: 30, color: Colors.orangeAccent)
-                          ],
+
+                        Container(
+                          width: 120,
+                          padding: EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            border: Border.all(color: Colors.grey, width: 1),
+                          ),
+
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '${widget
+                                    .shop.rating}/5',
+                                    style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
+                                  ),
+                                  const Icon(Icons.star_rounded, size: 30, color: Colors.orangeAccent)
+                                ],
+                              ),
+                              Text(
+                                formatTime(widget.shop.openTime),
+                                style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
+                              ),
+                              const Icon(Icons.access_time_filled_rounded),
+                              Text(
+                                formatTime(widget.shop.closeTime),
+                                style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         ),
-                        Text(
-                          formatTime(widget.shop.openTime),
-                          style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
-                        ),
-                        const Icon(Icons.access_time_filled_rounded),
-                        Text(
-                          formatTime(widget.shop.closeTime),
-                          style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
-                        ),
+                        SizedBox(height: 10,),
                         Container(
                           width: 120,
                           height: 40,
@@ -192,7 +202,24 @@ class _DetailScreenState extends State<DetailScreen> {
                             child: Text("Rate & review", style: TextStyle(color: Colors.white),),
                           ),
                         ),
+                        SizedBox(height: 5,),
+                        Container(
+                          width: 120,
+                          height: 40,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              try {
+                                final updateShopBloc = BlocProvider.of<UpdateShopBloc>(context);
 
+                              } catch (e) {
+                                log('Bloc is not available in the current context: $e');
+                              }
+                            },
+                            backgroundColor: Colors.blueAccent,
+                            heroTag: 'to_map_button',
+                            child: Text("See on map", style: TextStyle(color: Colors.white),),
+                          ),
+                        ),
 
                     ],),
                   ),
@@ -213,46 +240,54 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start, // Center the row within the container
                 children: [
-                  Text("Sort by:", style: TextStyle(fontSize: 15),),
+                  Text("Sort by:", style: TextStyle(fontSize: 17),),
                   SortButtonsWidget(shop: widget.shop,), // Call the newly created widget here
                 ],
               ),
             ),
+            Divider(height: 1, color: Colors.grey.shade400,),
             Container(
               height: 200,
               child: BlocBuilder<RatingBloc, RatingState>(
                 builder: (context, state) {
                   if (state is RatingsLoaded) {
-                    log("perfect");
                     return Expanded(
                       child: ListView.builder(
-                        itemCount: state.ratings.length,
+                        itemCount: state.ratingsWithUser.length,
                         itemBuilder: (context, index) {
-                          final rating = state.ratings[index];
-                          return Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Colors.grey.shade400,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            child: ListTile(
-                              title: Text("Vlad"),
-                              subtitle: Text(rating.review),
-                              trailing: Container(
-                                width: 40,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min, // Ensure the row takes the minimum space
-                                  children: [
-                                    Text(rating.rating.toString(), style: TextStyle(color: Colors.orangeAccent, fontSize: 17)),
-                                    Icon(Icons.star, color: Colors.orangeAccent),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
+                          final rating = state.ratingsWithUser[index].rating;
+                            return Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey.shade400,
+                                        width: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    title: Row(
+                                      children: [
+                                        Text(state.ratingsWithUser[index].userName),
+                                        const SizedBox(width: 10),
+                                        Text('*${rating.time.day}.${rating.time.month}.${rating.time.year}*', style: TextStyle(fontSize: 12),),
+                                      ],
+                                    ),
+                                    subtitle: Text(rating.review),
+                                    trailing: Container(
+                                      width: 40,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(rating.rating.toString(), style: TextStyle(color: Colors.orangeAccent, fontSize: 17)),
+                                          Icon(Icons.star, color: Colors.orangeAccent),
+                                        ],
+                                      ),
+                                    ),
+
+                                  ),
+                                );
+                                ;
 
                         },
                       ),
@@ -260,7 +295,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   } else if (state is RatingLoading) {
                     return Center(child: CircularProgressIndicator());
                   } else {
-                    // Handle other states like error or empty data
                     return Center(child: Text("No reviews available"));
                   }
                 },
@@ -323,5 +357,6 @@ class _DetailScreenState extends State<DetailScreen> {
       throw 'Could not open the map.';
     }
   }
+
 
 }

@@ -44,7 +44,7 @@ class RatingEntity extends Equatable {
       shopId: doc['shopId'] as String,
       rating: doc['rating'] as int,
       review: doc['review'] as String,
-      time: (doc['time'] as Timestamp).toDate(), // Convert Timestamp to DateTime
+      time: (doc['time'] as Timestamp).toDate(),
     );
   }
 }

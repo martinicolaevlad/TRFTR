@@ -69,16 +69,41 @@ class FirebaseRatingRepo implements RatingRepo {
 
 
   @override
-  Stream<List<Rating>> getRatingsByShopId(String shopId) {
+  Stream<List<Rating>> getRatingsByShopId(String shopId, String orderBy) {
+    if (orderBy == 'newest') {
+      return ratingsCollection
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('time', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) =>
+            Rating.fromEntity(RatingEntity.fromDocument(doc.data()))).toList();
+      });
+    } else if (orderBy == 'best') {
+      return ratingsCollection
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('rating', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) =>
+            Rating.fromEntity(RatingEntity.fromDocument(doc.data()))).toList();
+      });
+    } else if (orderBy == 'worst') {
+      return ratingsCollection
+          .where('shopId', isEqualTo: shopId)
+          .orderBy('rating', descending: false)
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) =>
+            Rating.fromEntity(RatingEntity.fromDocument(doc.data()))).toList();
+      });
+    }
     return ratingsCollection
         .where('shopId', isEqualTo: shopId)
-        // .orderBy('time', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) =>
           Rating.fromEntity(RatingEntity.fromDocument(doc.data()))).toList();
-        });
-    }
-  }
 
-
+    });
+  }}

@@ -4,16 +4,19 @@ import 'dart:developer';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rating_repository/rating_repository.dart';
+import 'package:user_repository/user_repository.dart';
 
 part 'rating_event.dart';
 part 'rating_state.dart';
 
 class RatingBloc extends Bloc<RatingEvent, RatingState> {
   final RatingRepo _ratingRepo;
+  final UserRepository _userRepository;
   StreamSubscription? _ratingSubscription;
 
-  RatingBloc({required RatingRepo ratingRepo})
+  RatingBloc({required RatingRepo ratingRepo, required UserRepository userRepo})
       : _ratingRepo = ratingRepo,
+        _userRepository = userRepo,
         super(RatingInitial()) {
     on<AddRating>((event, emit) async {
       emit(RatingLoading());
@@ -64,10 +67,12 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
     //All ratings:
     on<LoadRatings>((event, emit) async {
       emit(RatingLoading());
-      await _ratingSubscription?.cancel();
-      _ratingSubscription = ratingRepo.getRatingsByShopId(event.shopId).listen(
-              (ratings) {
-            add(UpdateRatings(ratings));
+      _ratingSubscription = ratingRepo.getRatingsByShopId(event.shopId, event.orderBy).listen(
+              (ratings) async {
+            final ratingsWithUser = await Future.wait(
+              ratings.map((rating) => _fetchUserAndCombine(rating)).toList(),
+            );
+            add(UpdateRatings(ratingsWithUser));
           },
           onError: (error) {
             emit(RatingFailure());
@@ -77,8 +82,11 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
     });
 
     on<UpdateRatings>((event, emit) {
-      log("is aici broski");
-      emit(RatingsLoaded(ratings: event.ratings));
+      emit(RatingsLoaded(ratingsWithUser: event.ratingsWithUsers));
     });
+  }
+  Future<RatingWithUser> _fetchUserAndCombine(Rating rating) async {
+    final user = await _userRepository.getMyUser(rating.userId);
+    return RatingWithUser(rating: rating, userName: user.name);
   }
 }

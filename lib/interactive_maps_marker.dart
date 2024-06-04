@@ -62,9 +62,9 @@ class InteractiveMapsMarker extends StatefulWidget {
       if (markerIconSelected == null) {
         markerIconSelected = await getBytesFromAsset('assets/location_selected.png', 120);
       }
-      completer.complete(); // Mark as complete if everything is successful
+      completer.complete();
     } catch (e) {
-      completer.completeError(e); // Propagate errors
+      completer.completeError(e);
     }
     return completer.future;
   }
@@ -97,7 +97,6 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
       pageController.addListener(_onPageViewScroll);
       rebuildMarkers(currentIndex);
     }).catchError((error) {
-      // Optionally handle errors, such as showing a dialog or a snackbar
       print('Failed to load icons: $error');
     });
   }
