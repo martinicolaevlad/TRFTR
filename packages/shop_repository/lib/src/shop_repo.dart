@@ -8,7 +8,7 @@ abstract class ShopRepo {
 
   Future<MyShop?> getShopById(String id);
 
-  Future <MyShop>createShop(MyShop shop);
+  Future<MyShop>createShop(MyShop shop);
 
   updateShopDetails(String shopId, {String? name, int? rating, String? picture, DateTime? nextDrop, DateTime? lastDrop, String? latitude, String? longitude, int? openTime, int? closeTime, String? ownerId, String? details, int? ratingsCount}) {}
 

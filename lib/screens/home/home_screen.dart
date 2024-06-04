@@ -28,12 +28,9 @@ class _HomeState extends State<Home> {
       child: BlocBuilder<GetShopBloc, GetShopState>(
         builder: (context, state) {
           if (state is GetShopSuccess) {
-            // Clear existing markers
             markers.clear();
-
-            for (var i = 0; i < state.props.length; i++) {
-              var prop = state.props[i];
-              if (prop is MyShop) {
+            for (var i = 0; i < state.shops.length; i++) {
+              var prop = state.shops[i];
                 double parsedLatitude = double.tryParse(prop.latitude) ?? 0.0;
                 double parsedLongitude = double.tryParse(prop.longitude) ?? 0.0;
                 markers.add(
@@ -43,7 +40,6 @@ class _HomeState extends State<Home> {
                     longitude: parsedLongitude,
                   ),
                 );
-              }
             }
 
             return Scaffold(

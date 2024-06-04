@@ -52,43 +52,33 @@ class FirebaseRatingRepo implements RatingRepo {
   }
 
   @override
-  Future<Rating?> getRating(String userId, String shopId) async {
-    try {
-      var querySnapshot = await ratingsCollection
-          .where('userId', isEqualTo: userId)
-          .where('shopId', isEqualTo: shopId)
-          .limit(1)
-          .get();
+  Stream<Rating> getRating(String shopId, String userId) {
+    return ratingsCollection
+        .where('shopId', isEqualTo: shopId)
+        .where('userId', isEqualTo: userId)
+        .orderBy('time', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) {
+        return Rating.fromEntity(RatingEntity.fromDocument(snapshot.docs.first.data()));
 
-      if (querySnapshot.docs.isNotEmpty) {
-        log('Rating found: ${querySnapshot.docs.first.data()}');
-        return Rating.fromEntity(RatingEntity.fromDocument(querySnapshot.docs.first.data()));
-      } else {
-        log('No rating found for user $userId and shop $shopId');
-        return null;
-      }
-    } catch (e) {
-      log('Error retrieving rating for user $userId and shop $shopId: ${e.toString()}');
-      rethrow;
-    }
+
+    });
   }
+
+
 
   @override
-  Future<List<Rating>> getRatingsByShopId(String shopId) async {
-    try {
-      var querySnapshot = await ratingsCollection.where('shopId', isEqualTo: shopId).get();
-      List<Rating> ratings = [];
-      if (querySnapshot.docs.isNotEmpty) {
-        for (var doc in querySnapshot.docs) {
-          ratings.add(Rating.fromEntity(RatingEntity.fromDocument(doc.data())));
-        }
-        return ratings;
-      } else {
-        return [];
-      }
-    } catch (e) {
-      rethrow;
+  Stream<List<Rating>> getRatingsByShopId(String shopId) {
+    return ratingsCollection
+        .where('shopId', isEqualTo: shopId)
+        // .orderBy('time', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) =>
+          Rating.fromEntity(RatingEntity.fromDocument(doc.data()))).toList();
+        });
     }
   }
 
-}
+

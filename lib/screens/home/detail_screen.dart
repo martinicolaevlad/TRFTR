@@ -8,6 +8,7 @@ import 'package:rating_repository/rating_repository.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/update_shop_bloc.dart';
 import 'package:sh_app/screens/home/rating_widget.dart';
+import 'package:sh_app/screens/home/sort_widget.dart';
 import 'package:shop_repository/shop_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:user_repository/user_repository.dart';
@@ -15,7 +16,6 @@ import 'package:favorite_repository/favorite_repository.dart';
 
 import '../../blocs/favorite_bloc/favorite_bloc.dart';
 import '../../blocs/my_user_bloc/my_user_bloc.dart';
-import '../../blocs/rating_bloc/rating_bloc.dart';
 import '../../blocs/rating_bloc/rating_bloc.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -36,7 +36,6 @@ class _DetailScreenState extends State<DetailScreen> {
   late final FavoriteRepo _favoriteRepo;
   late final ShopRepo _shopRepo;
   late final RatingRepo _ratingRepo;
-  late final TextEditingController _ratingController = TextEditingController();
   late int displayedRating = 0;
 
 
@@ -48,11 +47,11 @@ class _DetailScreenState extends State<DetailScreen> {
     _ratingRepo = FirebaseRatingRepo();
     _checkFavoriteStatus();
     fetchAndDisplayRating();
-    context.read<RatingBloc>().add(GetRatingsByShopId(widget.shop.id));
+    context.read<RatingBloc>().add(LoadRatings(widget.shop.id));
   }
 
   void fetchAndDisplayRating() async {
-    int newRating = await modifyRating(widget.shop);
+    int newRating = 5;
     setState(() {
       displayedRating = newRating;
     });
@@ -112,131 +111,161 @@ class _DetailScreenState extends State<DetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Hero(
-              tag: 'shop_image_${widget.shop.id}',
-              child: Container(
-                height: 300,
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(width: 1, color: Colors.grey.shade400), bottom: BorderSide(width: 1, color: Colors.grey.shade400),),
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: isValidPicture(widget.shop.picture)
-                        ? NetworkImage(widget.shop.picture!)
-                        : const AssetImage('assets/images/default_shop.jpg') as ImageProvider,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Row(
-                children: [
-                  Container(
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                "${formatTime(widget.shop.openTime)} - ${formatTime(widget.shop.closeTime)}",
-                                style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(width: 20),
-                              Text(
-                                '${displayedRating}/5',
-                                style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
-                              ),
-                              const Icon(Icons.star_rounded, size: 30, color: Colors.orangeAccent)
-                            ],
-                          ),
-                          if (widget.shop.nextDrop == widget.shop.lastDrop)
-                            const Text(
-                            'Next Drop: Coming Soon',
-                            style: TextStyle(fontSize: 16.0),
-                            ),
-                          if (widget.shop.nextDrop != widget.shop.lastDrop) Text(
-                            'Next Drop: ${formatDate(widget.shop.nextDrop!)}',
-                            style: const TextStyle(fontSize: 20.0),
-                          ),
-                          if (widget.shop.lastDrop != null) Text(
-                            'Last Drop: ${formatDate(widget.shop.lastDrop!)}',
-                            style: const TextStyle(fontSize: 20.0),
-                          ),
-                        ],
+            Row(
+              children: [
+                Container(
+                    height: 250,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(width: 1, color: Colors.grey.shade400), bottom: BorderSide(width: 1, color: Colors.grey.shade400),),
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: isValidPicture(widget.shop.picture)
+                            ? NetworkImage(widget.shop.picture!)
+                            : const AssetImage('assets/images/default_shop.jpg') as ImageProvider,
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
-
-              Column(
-                children: [
-                  Container(
-                    width: 120,
-                    height: 40,
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        try {
-                          final updateShopBloc = BlocProvider.of<UpdateShopBloc>(context);
-                          final getShopBloc = BlocProvider.of<GetShopBloc>(context);
-                          final ratingBloc = BlocProvider.of<RatingBloc>(context);
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext dialogContext) {
-                                return MultiBlocProvider(
-                                  providers: [
-                                    BlocProvider.value(
-                                      value: updateShopBloc,
-                                    ),
-                                    BlocProvider.value(
-                                      value: getShopBloc,
-                                    ),
-                                    BlocProvider.value(
-                                      value: ratingBloc,
-                                    )
-                                  ],
-                                  child: Dialog(
-                                    child: RatingInputWidget(
-                                      starsController: _ratingController,
-                                      hintText: "0",
-                                      shop: widget.shop,
-                                      user: widget.user,
-                                        onRatingChanged: (selectedStars) async {
-                                        _updateAverageRating(widget.shop.id);
-                                        }
-                                    ),
-                                  ),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              '${displayedRating}/5',
+                              style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
+                            ),
+                            const Icon(Icons.star_rounded, size: 30, color: Colors.orangeAccent)
+                          ],
+                        ),
+                        Text(
+                          formatTime(widget.shop.openTime),
+                          style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                        const Icon(Icons.access_time_filled_rounded),
+                        Text(
+                          formatTime(widget.shop.closeTime),
+                          style: const TextStyle(fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                          width: 120,
+                          height: 40,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              try {
+                                final updateShopBloc = BlocProvider.of<UpdateShopBloc>(context);
+                                final getShopBloc = BlocProvider.of<GetShopBloc>(context);
+                                final ratingBloc = BlocProvider.of<RatingBloc>(context);
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext dialogContext) {
+                                      return MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider.value(
+                                            value: updateShopBloc,
+                                          ),
+                                          BlocProvider.value(
+                                            value: getShopBloc,
+                                          ),
+                                          BlocProvider.value(
+                                            value: ratingBloc,
+                                          )
+                                        ],
+                                        child: Dialog(
+                                          child: RatingInputWidget(
+                                            hintText: "0",
+                                            shop: widget.shop,
+                                            user: widget.user,
+                                          ),
+                                        ),
+                                      );
+                                    }
                                 );
+                              } catch (e) {
+                                log('Bloc is not available in the current context: $e');
                               }
-                          );
-                        } catch (e) {
-                          log('Bloc is not available in the current context: $e');
-                        }
-                      },
-                      backgroundColor: Colors.red.shade900,
-                      heroTag: 'rating_button',
-                      child: Text("Rate & review", style: TextStyle(color: Colors.white),),
-                    ),
+                            },
+                            backgroundColor: Colors.red.shade900,
+                            heroTag: 'rating_button',
+                            child: Text("Rate & review", style: TextStyle(color: Colors.white),),
+                          ),
+                        ),
+
+
+                    ],),
                   ),
-                  SizedBox(height: 4),
-                  Container(
-                      width: 120,
-                      height: 40,
-                      child: FloatingActionButton(
-                        onPressed: () => _launchGoogleMaps(widget.shop.latitude, widget.shop.longitude),
-                        backgroundColor: Colors.blueAccent,
-                        child: Icon(Icons.directions),
-                      )
-                  )
-                ],
-              )
-
-
+                )
               ],
-              ),
             ),
 
+            Divider(height: 1, color: Colors.grey.shade400,),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+              child: Center(child: Text(widget.shop.details ?? "Welcome to our shop!",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),)),
+            ),
+            Divider(height: 1, color: Colors.grey.shade400,),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start, // Center the row within the container
+                children: [
+                  Text("Sort by:", style: TextStyle(fontSize: 15),),
+                  SortButtonsWidget(shop: widget.shop,), // Call the newly created widget here
+                ],
+              ),
+            ),
+            Container(
+              height: 200,
+              child: BlocBuilder<RatingBloc, RatingState>(
+                builder: (context, state) {
+                  if (state is RatingsLoaded) {
+                    log("perfect");
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: state.ratings.length,
+                        itemBuilder: (context, index) {
+                          final rating = state.ratings[index];
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.grey.shade400,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: ListTile(
+                              title: Text("Vlad"),
+                              subtitle: Text(rating.review),
+                              trailing: Container(
+                                width: 40,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min, // Ensure the row takes the minimum space
+                                  children: [
+                                    Text(rating.rating.toString(), style: TextStyle(color: Colors.orangeAccent, fontSize: 17)),
+                                    Icon(Icons.star, color: Colors.orangeAccent),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+
+                        },
+                      ),
+                    );
+                  } else if (state is RatingLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    // Handle other states like error or empty data
+                    return Center(child: Text("No reviews available"));
+                  }
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -255,48 +284,35 @@ class _DetailScreenState extends State<DetailScreen> {
     return '${date.day}.${date.month}.${date.year}';
   }
 
-  Future<void> _updateAverageRating(String shopId) async {
-    try {
-      await Future.delayed(const Duration(hours: 1));
-      log("Au trecut 5 secunde");
-       int newRating = await modifyRating(widget.shop);
+  // Future<void> _updateAverageRating(String shopId) async {
+  //   try {
+  //     await Future.delayed(const Duration(hours: 1));
+  //     log("Au trecut 5 secunde");
+  //      int newRating = await modifyRating(widget.shop);
+  //
+  //     _shopRepo.getShopById(widget.shop.id).then((existingRating) {
+  //       BlocProvider.of<UpdateShopBloc>(context).add(UpdateShop(
+  //           shopId: widget.shop.id,
+  //           name: widget.shop.name,
+  //           latitude: widget.shop.latitude,
+  //           longitude: widget.shop.longitude,
+  //           nextDrop: widget.shop.nextDrop,
+  //           openTime: widget.shop.openTime,
+  //           closeTime: widget.shop.closeTime,
+  //           ownerId: widget.user.id,
+  //           details: widget.shop.details,
+  //           rating: displayedRating,
+  //           ratingsCount: widget.shop.ratingsCount
+  //       ));
+  //       BlocProvider.of<GetShopBloc>(context).add(GetShop());
+  //       });
+  //
+  //   } catch (e) {
+  //     log('Error updating average rating for shopId $shopId: ${e.toString()}');
+  //     rethrow;
+  //   }
+  // }
 
-      _shopRepo.getShopById(widget.shop.id).then((existingRating) {
-        BlocProvider.of<UpdateShopBloc>(context).add(UpdateShop(
-            shopId: widget.shop.id,
-            name: widget.shop.name,
-            latitude: widget.shop.latitude,
-            longitude: widget.shop.longitude,
-            nextDrop: widget.shop.nextDrop,
-            openTime: widget.shop.openTime,
-            closeTime: widget.shop.closeTime,
-            ownerId: widget.user.id,
-            details: widget.shop.details,
-            rating: displayedRating,
-            ratingsCount: widget.shop.ratingsCount
-        ));
-        BlocProvider.of<GetShopBloc>(context).add(GetShop());
-        });
-
-    } catch (e) {
-      log('Error updating average rating for shopId $shopId: ${e.toString()}');
-      rethrow;
-    }
-  }
-
-  Future<int> modifyRating(MyShop shop) async {
-    List<Rating?> ratings = await _ratingRepo.getRatingsByShopId(shop.id);
-    if (ratings.isNotEmpty) {
-      int totalRating = ratings.fold(0, (sum, item) => sum + item!.rating);
-      int averageRating = totalRating ~/ ratings.length;
-
-      _updateAverageRating(widget.shop.id);
-
-      return averageRating;
-    } else {
-      return 0;
-    }
-  }
 
   void _launchGoogleMaps(String lat, String long) async {
     String googleMapsUrl = "https://www.google.com/maps/dir/?api=1&destination=$lat,$long&travelmode=driving";

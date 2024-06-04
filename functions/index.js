@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-exports.todayDropDailyNotification = functions.pubsub.schedule('* */1 * * *')
+exports.todayDropDailyNotification = functions.pubsub.schedule('0 8 * * *')
   .timeZone('Europe/Bucharest')
   .onRun(async context => {
     const todayStart = new Date();
@@ -164,8 +164,8 @@ exports.tomorrowNextDrop = functions.pubsub.schedule('0 18 * * *') // Runs every
     console.log('All notifications sent successfully.');
   });
 
-exports.updateDropDates = functions.pubsub.schedule('0 0 * * *') // Runs daily at 00:00
-  .timeZone('Europe/Bucharest') // Adjust the timezone to your local timezone
+exports.updateDropDates = functions.pubsub.schedule('0 0 * * *')
+  .timeZone('Europe/Bucharest')
   .onRun(async (context) => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -325,7 +325,7 @@ exports.notifyShopOwnerOnRating = functions.firestore
 
         const notifications = admin.firestore().collection('notifications');
         await notifications.add({
-          text: `${rating} stars from ${userName}.`,
+          text: `${rating} stars from ${userName}: "${review}"`,
           userId: ownerId,
           shopId: '',
           time: admin.firestore.FieldValue.serverTimestamp(),

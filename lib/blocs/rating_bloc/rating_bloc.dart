@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rating_repository/rating_repository.dart';
@@ -7,6 +10,7 @@ part 'rating_state.dart';
 
 class RatingBloc extends Bloc<RatingEvent, RatingState> {
   final RatingRepo _ratingRepo;
+  StreamSubscription? _ratingSubscription;
 
   RatingBloc({required RatingRepo ratingRepo})
       : _ratingRepo = ratingRepo,
@@ -25,7 +29,7 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
       emit(RatingLoading());
       try {
         Rating rating = await _ratingRepo.updateRating(
-          event.ratingId,
+            event.ratingId,
             userId: event.userId,
             shopId: event.shopId,
             rating: event.rating,
@@ -37,27 +41,44 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
         emit(RatingFailure());
       }
     });
-
+    //Single rating:
     on<GetRating>((event, emit) async {
       emit(RatingLoading());
-      try {
-        Rating? rating = await _ratingRepo.getRating(event.userId, event.shopId);
-        emit(RatingSuccess(rating));
-      } catch (e) {
-        emit(RatingFailure());
-      }
+      await _ratingSubscription?.cancel();
+      _ratingSubscription =
+          ratingRepo.getRating(event.shopId, event.userId).listen(
+                  (rating) {
+                add(RefreshRating(rating));
+              },
+              onError: (error) {
+                emit(RatingFailure());
+                log('Error retrieving notifications: ${error.toString()}');
+              }
+          );
     });
 
+    on<RefreshRating>((event, emit) async {
+      emit(RatingLoaded(rating: event.rating));
+    });
 
+    //All ratings:
+    on<LoadRatings>((event, emit) async {
+      emit(RatingLoading());
+      await _ratingSubscription?.cancel();
+      _ratingSubscription = ratingRepo.getRatingsByShopId(event.shopId).listen(
+              (ratings) {
+            add(UpdateRatings(ratings));
+          },
+          onError: (error) {
+            emit(RatingFailure());
+            log('Error retrieving notifications: ${error.toString()}');
+          }
+      );
+    });
 
-    on<GetRatingsByShopId>((event, emit) async {
-        emit(RatingLoading());
-        try {
-          List<Rating?> rating = await _ratingRepo.getRatingsByShopId(event.shopId);
-          emit(RatingSuccess(rating.first));
-        } catch (e) {
-          emit(RatingFailure());
-        }
-      });
-    }
+    on<UpdateRatings>((event, emit) {
+      log("is aici broski");
+      emit(RatingsLoaded(ratings: event.ratings));
+    });
+  }
 }

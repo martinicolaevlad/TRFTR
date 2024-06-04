@@ -13,18 +13,14 @@ import '../../blocs/rating_bloc/rating_bloc.dart';
 import '../../blocs/shop_blocs/update_shop_bloc.dart';
 
 class RatingInputWidget extends StatefulWidget {
-  final TextEditingController starsController;
   final String hintText;
   final MyUser user;
   final MyShop shop;
-  final Function(int) onRatingChanged;
 
   const RatingInputWidget({
-    required this.starsController,
     required this.hintText,
     required this.shop,
     required this.user,
-    required this.onRatingChanged,
 
     super.key,
   });
@@ -45,7 +41,8 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
   @override
   void initState() {
     super.initState();
-    initializeRatingDetails();
+    context.read<RatingBloc>().add(GetRating(widget.shop.id, widget.user.id));
+    // initializeRatingDetails();
   }
 
   int newRating(int rating, int counter) {
@@ -60,19 +57,24 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
     return newValue;
   }
 
-  void initializeRatingDetails() async {
-    var fetchedRating = await _ratingRepo.getRating(widget.user.id, widget.shop.id);
-    if (fetchedRating != null) {
-      setState(() {
-        rating = fetchedRating;
-        _selectedStars = fetchedRating.rating;
-        _selectedReview.text = fetchedRating.review;
-        _fillStars();
-      });
-    }
-  }
+  // void initializeRatingDetails() async {
+  //   BlocBuilder<RatingBloc, RatingState>(
+  //     builder: (context, state) {
+  //       if (state is RatingLoaded) {
+  //         setState(() {
+  //           _selectedStars = state.rating.rating;
+  //           _selectedReview.text = state.rating.review;
+  //           _fillStars();
+  //         });
+  //       }
+  //     },
+  //   );
+  // }
 
-  List<Widget> _fillStars() {
+
+  List<Widget> _fillStars(int initialRating) {
+    _selectedStars = initialRating;
+
     return List.generate(5, (index) => IconButton(
       icon: Icon(
         _selectedStars > index ? Icons.star : Icons.star_border,
@@ -82,12 +84,11 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
       onPressed: () {
         setState(() {
           _selectedStars = index + 1;
-          widget.starsController.text = _selectedStars.toString();
-          widget.onRatingChanged(_selectedStars);
         });
       },
     ));
   }
+
 
   void showErrorDialog(String message) {
     showDialog(
@@ -120,76 +121,33 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
     return true;
   }
 
-  void _saveRatingDetails() async {
-    if (!_validateInputs()) {
-      return;
-    }
-
-    _ratingRepo.getRating(widget.user.id, widget.shop.id).then((existingRating) {
-
-      if (existingRating != null) {
-        BlocProvider.of<RatingBloc>(context).add(UpdateRating(
-            ratingId: existingRating.id,
-            userId: existingRating.userId,
-            shopId: existingRating.shopId,
-            rating: _selectedStars,
-            review: _selectedReview.text,
-            time: DateTime.now()
-        ));
-
-      } else {
-
-        BlocProvider.of<RatingBloc>(context).add(AddRating(
-            Rating(
-                id: "0",
-                userId: user.id,
-                shopId: shop.id,
-                rating: _selectedStars,
-                review: _selectedReview.text,
-                time: DateTime.now()
-            )));
-        BlocProvider.of<UpdateShopBloc>(context).add(UpdateShop(
-            shopId: shop.id,
-            name: shop.name,
-            latitude: shop.latitude,
-            longitude: shop.longitude,
-            nextDrop: shop.nextDrop,
-            openTime: shop.openTime,
-            closeTime: shop.closeTime,
-            ownerId: user.id,
-            details: shop.details,
-            rating: shop.rating,
-            ratingsCount: shop.ratingsCount + 1
-        ));
-      }
-
-      BlocProvider.of<GetShopBloc>(context).add(GetShop());
-    }
-    );}
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
+    return BlocBuilder<RatingBloc, RatingState>(
+      builder: (context, state) {
+        if(state is RatingLoaded) {
+          return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: _fillStars()
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _fillStars(state.rating.rating)
+                  ),
+                ),
+                Text(
+                  "${_selectedStars != 0
+                      ? _selectedStars.toString()
+                      : rating != null ? rating!.rating : widget.hintText}/5",
+                  style: const TextStyle(color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            Text(
-              "${widget.starsController.text.isNotEmpty
-                  ? widget.starsController.text
-                  : rating != null ? rating!.rating : widget.hintText}/5",
-              style: const TextStyle(color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
         SizedBox(height: 5),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -226,7 +184,7 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
                  height: 40,
                  child: FloatingActionButton(
                     onPressed: () {
-                      _saveRatingDetails();
+                      // _saveRatingDetails();
                       Navigator.of(context).pop();
                     },
                    backgroundColor: Colors.red.shade900,
@@ -254,5 +212,9 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
         ),
       ],
     );
+        }
+        return Text("EROARE");
+  },
+);
   }
 }

@@ -39,7 +39,7 @@ class _InboxState extends State<Inbox> {
       appBar: AppBar(
         title: Center(
           child: Text(
-            "Notifications",
+            "Inbox",
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -184,8 +184,8 @@ class _InboxState extends State<Inbox> {
     } else if (match.group(0)!.toLowerCase() == "tomorrow") {
 
         return Container(
-            width: 60,
-            height: 60,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(border: Border.all(width: 2, color: Colors.black87), color: Colors.purple.shade400,),
             child:Container(
               height: 40,
@@ -198,11 +198,11 @@ class _InboxState extends State<Inbox> {
                 ),
               ),
             ),);
-    } else if (match.group(0)!.toLowerCase() == "TODAY") {
+    } else if (match.group(0)!.toLowerCase() == "today") {
         return Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(border: Border.all(width: 2, color: Colors.black87), shape: BoxShape.circle, color: Colors.purple, gradient: RainbowGradient(
+            decoration: BoxDecoration(border: Border.all(width: 2, color: Colors.black87), shape: BoxShape.circle, gradient: RainbowGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: const <Color>[

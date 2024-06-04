@@ -1,6 +1,9 @@
 part of 'rating_bloc.dart';
 abstract class RatingEvent extends Equatable {
   const RatingEvent();
+
+  @override
+  List<Object> get props => [];
 }
 
 class AddRating extends RatingEvent {
@@ -28,7 +31,7 @@ class UpdateRating extends RatingEvent {
   });
 
   @override
-  List<Object?> get props => [ratingId, userId, shopId, rating, review, time];
+  List<Object> get props => [ratingId, userId, shopId, rating, review, time];
 }
 
 class GetRating extends RatingEvent {
@@ -37,6 +40,26 @@ class GetRating extends RatingEvent {
   const GetRating(this.userId, this.shopId);
   @override
   List<Object> get props => [userId, shopId];
+}
+
+class RefreshRating extends RatingEvent{
+  final Rating rating;
+  RefreshRating(this.rating);
+  @override
+  List<Object> get props => [rating];
+}
+
+
+class LoadRatings extends RatingEvent{
+  final String shopId;
+  const LoadRatings(this.shopId);
+}
+
+class UpdateRatings extends RatingEvent{
+  final List<Rating> ratings;
+  UpdateRatings(this.ratings);
+  @override
+  List<Object> get props => [ratings];
 }
 
 class GetRatingsByShopId extends RatingEvent {

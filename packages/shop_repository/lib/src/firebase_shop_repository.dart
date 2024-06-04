@@ -10,10 +10,11 @@ import '../shop_repository.dart';
 class FirebaseShopRepo implements ShopRepo {
   final shopCollection = FirebaseFirestore.instance.collection('shops');
 
+
+  @override
   Future<MyShop> createShop(MyShop shop) async {
     try {
       shop.id = const Uuid().v1();
-
 
       await shopCollection
           .doc(shop.id)

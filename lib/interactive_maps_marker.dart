@@ -163,7 +163,7 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
               zoomControlsEnabled: false,
               markers: markers,
               myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              myLocationButtonEnabled: false,
               onMapCreated: _onMapCreated,
               initialCameraPosition: CameraPosition(
                 target: widget.center,
@@ -222,7 +222,6 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
       selectedMarker.value = current;
     });
   }
-
 
   void setIndex(int index){
     pageController.animateToPage(
