@@ -27,8 +27,8 @@ class NotificationService {
 
     flutterLocalNotificationsPlugin.show(
       01,
-      event.get('text'), // Assuming 'text' is used for the notification body
-      '', // Title can be left empty or you can add another field if needed
+      event.get('text'),
+      '',
       details,
     );
   }

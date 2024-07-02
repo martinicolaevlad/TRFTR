@@ -13,6 +13,7 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
   final RatingRepo _ratingRepo;
   final UserRepository _userRepository;
   StreamSubscription? _ratingSubscription;
+  Future? _singleRating;
 
   RatingBloc({required RatingRepo ratingRepo, required UserRepository userRepo})
       : _ratingRepo = ratingRepo,
@@ -47,17 +48,14 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
     //Single rating:
     on<GetRating>((event, emit) async {
       emit(RatingLoading());
-      await _ratingSubscription?.cancel();
-      _ratingSubscription =
-          ratingRepo.getRating(event.shopId, event.userId).listen(
-                  (rating) {
-                add(RefreshRating(rating));
-              },
-              onError: (error) {
-                emit(RatingFailure());
-                log('Error retrieving notifications: ${error.toString()}');
-              }
-          );
+      log("cancleded");
+      try {
+        Rating? rating= await _ratingRepo.getRating(event.shopId, event.userId);
+        log(rating.toString());
+        add(RefreshRating(rating!));
+      } catch (e) {
+        emit(RatingFailure());
+      }
     });
 
     on<RefreshRating>((event, emit) async {

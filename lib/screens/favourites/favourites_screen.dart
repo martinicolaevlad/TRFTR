@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:favorite_repository/favorite_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 import 'package:sh_app/blocs/favorite_bloc/favorite_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:shop_repository/shop_repository.dart';
@@ -11,11 +12,14 @@ import '../../blocs/my_user_bloc/my_user_bloc.dart';
 import '../home/home_screen.dart';
 
 class Favourites extends StatefulWidget {
-  const Favourites({Key? key}) : super(key: key);
+  final PersistentTabController controller;
+
+  const Favourites({Key? key, required this.controller}) : super(key: key);
 
   @override
   _FavouritesState createState() => _FavouritesState();
 }
+
 
 class _FavouritesState extends State<Favourites> {
   @override
@@ -74,7 +78,7 @@ class _FavouritesState extends State<Favourites> {
                             height: 120,
                             width: 120,
 
-                            child: BottomTile(item: shop)),
+                            child: BottomTile(item: shop, controller: widget.controller,)),
                       ),
                     );
                   },

@@ -12,18 +12,16 @@ import 'components/messaging.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // This should be the first line in main.
+  WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate();
 
   final MessagingService _messagingService = MessagingService();
-  await _messagingService.initMessaging(); // Make sure this is async and awaited if it's setting up async operations.
+  await _messagingService.initMessaging();
 
-  // Optional: Setup for Bloc if you use Bloc patterns in your app
   // Bloc.observer = SimpleBlocObserver();
 
-  // Lock orientation to portrait mode
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   runApp(MainApp(FirebaseUserRepository()));

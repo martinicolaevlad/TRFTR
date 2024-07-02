@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 import 'package:rating_repository/rating_repository.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/update_shop_bloc.dart';
@@ -16,16 +17,21 @@ import 'package:user_repository/user_repository.dart';
 import 'package:favorite_repository/favorite_repository.dart';
 
 import '../../blocs/favorite_bloc/favorite_bloc.dart';
+import '../../blocs/map_bloc/map_bloc.dart';
 import '../../blocs/my_user_bloc/my_user_bloc.dart';
 import '../../blocs/rating_bloc/rating_bloc.dart';
+import 'home_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   final MyShop shop;
   final MyUser user;
+  final PersistentTabController controller;
+
   const DetailScreen({
     required this.shop,
     required this.user,
-    Key? key
+    required this.controller,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -45,7 +51,7 @@ class _DetailScreenState extends State<DetailScreen> {
     _shopRepo = FirebaseShopRepo();
     _ratingRepo = FirebaseRatingRepo();
     _checkFavoriteStatus();
-    context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'newest'));
+    context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
   }
 
 
@@ -114,7 +120,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         fit: BoxFit.cover,
                         image: isValidPicture(widget.shop.picture)
                             ? NetworkImage(widget.shop.picture!)
-                            : const AssetImage('assets/images/default_shop.jpg') as ImageProvider,
+                            : const AssetImage('assets/2.png') as ImageProvider,
                       ),
                     ),
                   ),
@@ -158,8 +164,23 @@ class _DetailScreenState extends State<DetailScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 10,),
-                        Container(
+                        const SizedBox(height: 10,),
+                        SizedBox(
+                          width: 120,
+                          height: 40,
+                          child:FloatingActionButton(
+                            onPressed: () {
+                              context.read<MapBloc>().add(SelectShopOnMap(widget.shop.id, widget.shop.latitude, widget.shop.longitude));
+                              widget.controller.jumpToTab(0);
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            },
+                            backgroundColor: Colors.green.shade500,
+                            heroTag: 'to_map_button',
+                            child: const Text("See on map", style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                          SizedBox(
                           width: 120,
                           height: 40,
                           child: FloatingActionButton(
@@ -200,24 +221,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             backgroundColor: Colors.red.shade900,
                             heroTag: 'rating_button',
                             child: Text("Rate & review", style: TextStyle(color: Colors.white),),
-                          ),
-                        ),
-                        SizedBox(height: 5,),
-                        Container(
-                          width: 120,
-                          height: 40,
-                          child: FloatingActionButton(
-                            onPressed: () {
-                              try {
-                                final updateShopBloc = BlocProvider.of<UpdateShopBloc>(context);
 
-                              } catch (e) {
-                                log('Bloc is not available in the current context: $e');
-                              }
-                            },
-                            backgroundColor: Colors.blueAccent,
-                            heroTag: 'to_map_button',
-                            child: Text("See on map", style: TextStyle(color: Colors.white),),
                           ),
                         ),
 
@@ -238,10 +242,10 @@ class _DetailScreenState extends State<DetailScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start, // Center the row within the container
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text("Sort by:", style: TextStyle(fontSize: 17),),
-                  SortButtonsWidget(shop: widget.shop,), // Call the newly created widget here
+                  SortButtonsWidget(shop: widget.shop,),
                 ],
               ),
             ),
@@ -268,9 +272,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                   child: ListTile(
                                     title: Row(
                                       children: [
-                                        Text(state.ratingsWithUser[index].userName),
+                                        SizedBox(width: 70, child: Text(state.ratingsWithUser[index].userName)),
                                         const SizedBox(width: 10),
-                                        Text('*${rating.time.day}.${rating.time.month}.${rating.time.year}*', style: TextStyle(fontSize: 12),),
+                                        Text(
+                                          '• ${rating.time.day < 10 ? "0${rating.time.day}" : "${rating.time.day}"}.${rating.time.month < 10 ? "0${rating.time.month}" : "${rating.time.month}"}.${rating.time.year} •',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
                                       ],
                                     ),
                                     subtitle: Text(rating.review),
@@ -294,6 +301,8 @@ class _DetailScreenState extends State<DetailScreen> {
                     );
                   } else if (state is RatingLoading) {
                     return Center(child: CircularProgressIndicator());
+                  } else if (state is RatingLoaded) {
+                    return Center(child: Text(""),);
                   } else {
                     return Center(child: Text("No reviews available"));
                   }
@@ -316,46 +325,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   String formatDate(DateTime date) {
     return '${date.day}.${date.month}.${date.year}';
-  }
-
-  // Future<void> _updateAverageRating(String shopId) async {
-  //   try {
-  //     await Future.delayed(const Duration(hours: 1));
-  //     log("Au trecut 5 secunde");
-  //      int newRating = await modifyRating(widget.shop);
-  //
-  //     _shopRepo.getShopById(widget.shop.id).then((existingRating) {
-  //       BlocProvider.of<UpdateShopBloc>(context).add(UpdateShop(
-  //           shopId: widget.shop.id,
-  //           name: widget.shop.name,
-  //           latitude: widget.shop.latitude,
-  //           longitude: widget.shop.longitude,
-  //           nextDrop: widget.shop.nextDrop,
-  //           openTime: widget.shop.openTime,
-  //           closeTime: widget.shop.closeTime,
-  //           ownerId: widget.user.id,
-  //           details: widget.shop.details,
-  //           rating: displayedRating,
-  //           ratingsCount: widget.shop.ratingsCount
-  //       ));
-  //       BlocProvider.of<GetShopBloc>(context).add(GetShop());
-  //       });
-  //
-  //   } catch (e) {
-  //     log('Error updating average rating for shopId $shopId: ${e.toString()}');
-  //     rethrow;
-  //   }
-  // }
-
-
-  void _launchGoogleMaps(String lat, String long) async {
-    String googleMapsUrl = "https://www.google.com/maps/dir/?api=1&destination=$lat,$long&travelmode=driving";
-
-    if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
-      await launchUrl(Uri.parse(googleMapsUrl));
-    } else {
-      throw 'Could not open the map.';
-    }
   }
 
 

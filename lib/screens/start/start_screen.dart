@@ -44,7 +44,7 @@ class _StartScreenState extends State<StartScreen> with TickerProviderStateMixin
             child: Column(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(20), // Adjust the value for the desired roundness
+                  borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
                     "assets/2.png",
                     scale: 5,

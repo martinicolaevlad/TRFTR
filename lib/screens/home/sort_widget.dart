@@ -17,10 +17,10 @@ class SortButtonsWidget extends StatefulWidget {
 }
 
 class _SortButtonsWidgetState extends State<SortButtonsWidget> {
-  String _selectedSort = 'newest';
+  String _selectedSort = 'latest';
   late final MyShop shop;
 
-  _SortButtonsWidgetState(this.shop); // Default selected sort
+  _SortButtonsWidgetState(this.shop);
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +29,10 @@ class _SortButtonsWidgetState extends State<SortButtonsWidget> {
       child: Row(
         children: [
           ButtonBar(
-            alignment: MainAxisAlignment.center, // Center the buttons within the button bar
-            buttonPadding: EdgeInsets.symmetric(horizontal: 5), // Spacing between the buttons
+            alignment: MainAxisAlignment.center,
+            buttonPadding: EdgeInsets.symmetric(horizontal: 5),
             children: <Widget>[
-              buildSortButton('newest'),
+              buildSortButton('latest'),
               buildSortButton('best'),
               buildSortButton('worst'),
             ],
@@ -48,7 +48,7 @@ class _SortButtonsWidgetState extends State<SortButtonsWidget> {
       onPressed: () {
         setState(() {
           _selectedSort = title;
-          if(_selectedSort == "newest"){
+          if(_selectedSort == "latest"){
             context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'newest'));
           }
           if(_selectedSort == "best"){
@@ -63,10 +63,10 @@ class _SortButtonsWidgetState extends State<SortButtonsWidget> {
       style: ElevatedButton.styleFrom(
         foregroundColor: isActive ? Colors.white : Colors.black,
         backgroundColor: isActive ? Colors.red.shade900 : Colors.white,
-        side: BorderSide(color: Colors.red.shade900, width: 1), // Border color and width
-        padding: EdgeInsets.symmetric(vertical: 4.0), // Adjust vertical padding
+        side: BorderSide(color: Colors.red.shade900, width: 1),
+        padding: EdgeInsets.symmetric(vertical: 4.0),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0), // Adjust border radius if needed
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     )

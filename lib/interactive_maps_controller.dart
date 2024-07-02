@@ -1,5 +1,4 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'interactive_maps_marker.dart';
 
 class InteractiveMapsController {
@@ -11,25 +10,26 @@ class InteractiveMapsController {
     _state = state;
   }
 
-  void setCurrentIndex(int index) {
+  void setCurrentMarker(String id) {
     if (_state != null) {
-      _state?.setIndex(index);
+      _state?.setIndex(id);
     }
   }
 
-  void rebuild([int? index]) {
+  void rebuild([String? id]) {
     _state?.setState(() {
-      _state?.setIndex(index ?? _state?.currentIndex ?? 0);
+      _state?.setIndex(id ?? _state?.currentMarkerId ?? '');
     });
   }
 
-  void reset({int? index}) {
+  void reset({String? id}) {
     Future.delayed(Duration(milliseconds: 200)).then((value) {
-      _state?.pageController.jumpToPage(index ?? _state?.currentIndex ?? 0);
-      _state?.rebuildMarkers(index ?? _state?.currentIndex ?? 0);
+      int pageIndex = _state?.widget.items.indexWhere((item) => item.id == (id ?? _state?.currentMarkerId ?? '')) ?? 0;
+      _state?.pageController.jumpToPage(pageIndex);
+      _state?.rebuildMarkers(id ?? _state?.currentMarkerId ?? '');
       getMapController()?.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: _state!.widget.center, zoom: _state!.widget.zoom),
+          CameraPosition(target: _state!.markers.firstWhere((marker) => marker.markerId.value == (id ?? _state?.currentMarkerId), orElse: () => Marker(markerId: MarkerId(''))).position, zoom: _state!.widget.zoomFocus),
         ),
       );
     });

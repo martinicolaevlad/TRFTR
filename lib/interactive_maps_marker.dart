@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
@@ -9,7 +9,7 @@ export 'package:sh_app/interactive_maps_controller.dart';
 import './utils.dart';
 
 class MarkerItem {
-  int id;
+  String id;
   double latitude;
   double longitude;
   String? search;
@@ -33,6 +33,7 @@ class InteractiveMapsMarker extends StatefulWidget {
   VoidCallback? onLastItem;
 
   InteractiveMapsMarker({
+    Key? key,
     required this.items,
     this.itemBuilder,
     this.center = const LatLng(0.0, 0.0),
@@ -45,9 +46,9 @@ class InteractiveMapsMarker extends StatefulWidget {
     this.contentAlignment = Alignment.bottomCenter,
     this.controller,
     this.onLastItem,
-    this.search
-  }){
-    if(itemBuilder == null && itemContent == null){
+    this.search,
+  }) : super(key: key) {
+    if (itemBuilder == null && itemContent == null) {
       throw Exception('itemBuilder or itemContent must be provided');
     }
     readIcons();
@@ -73,13 +74,7 @@ class InteractiveMapsMarker extends StatefulWidget {
   Uint8List? markerIconSelected;
 
   @override
-  InteractiveMapsMarkerState createState() {
-    var state = InteractiveMapsMarkerState();
-    if(controller != null){
-      controller!.currentState(state);
-    }
-    return state;
-  }
+  InteractiveMapsMarkerState createState() => InteractiveMapsMarkerState();
 }
 
 class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
@@ -87,21 +82,20 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
   GoogleMapController? mapController;
   PageController pageController = PageController(viewportFraction: 0.9);
   Set<Marker> markers = {};
-  int currentIndex = 0;
-  ValueNotifier<int?> selectedMarker = ValueNotifier<int?>(0);
+  String? currentMarkerId;
 
   @override
   void initState() {
     super.initState();
     widget.readIcons().then((_) {
       pageController.addListener(_onPageViewScroll);
-      rebuildMarkers(currentIndex);
+      if (widget.items.isNotEmpty) {
+        rebuildMarkers(widget.items.first.id);
+      }
     }).catchError((error) {
       print('Failed to load icons: $error');
     });
   }
-
-
 
   @override
   void dispose() {
@@ -114,7 +108,9 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    rebuildMarkers(currentIndex);
+    if (widget.items.isNotEmpty && currentMarkerId != null) {
+      rebuildMarkers(currentMarkerId!);
+    }
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -123,7 +119,6 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
     }
     mapController = controller;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -155,9 +150,8 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: ValueListenableBuilder(
-          valueListenable: selectedMarker,
+          valueListenable: ValueNotifier(currentMarkerId),
           builder: (context, value, child) {
-            print('Values changed');
             return GoogleMap(
               zoomControlsEnabled: false,
               markers: markers,
@@ -175,54 +169,50 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
     );
   }
 
-
-
-  Widget _buildItem(BuildContext context, int i) {
+  Widget _buildItem(BuildContext context, int index) {
+    MarkerItem item = widget.items[index];
     return Transform.scale(
-      scale: i == currentIndex ? 1 : 0.9,
+      scale: item.id == currentMarkerId ? 1 : 0.9,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.0),
         child: Container(
           height: widget.itemHeight,
           decoration: BoxDecoration(
               color: Color(0xffffffff),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)]
-          ),
-          child: widget.itemContent!(context, i),
+              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)]),
+          child: widget.itemContent!(context, index),
         ),
       ),
     );
   }
 
   void _pageChanged(int index) {
-    setState(() => currentIndex = index);
-    rebuildMarkers(index);
+    String id = widget.items[index].id;
+    setState(() => currentMarkerId = id);
+    rebuildMarkers(id);
   }
 
-  Future<void> rebuildMarkers(int index) async {
-    if(widget.items.isEmpty) return;
-    int current = widget.items[index].id;
-
-    Set<Marker> _markers = Set<Marker>();
-
-    widget.items.forEach((item) {
+  Future<void> rebuildMarkers(String id) async {
+    Set<Marker> _markers = {};
+    for (var item in widget.items) {
       _markers.add(
         Marker(
-          markerId: MarkerId(item.id.toString()),
+          markerId: MarkerId(item.id),
           position: LatLng(item.latitude, item.longitude),
-          onTap: () => setIndex(widget.items.indexOf(item)),
-          icon: BitmapDescriptor.fromBytes(item.id == current ? widget.markerIconSelected! : widget.markerIcon!),
+          onTap: () => setIndex(item.id),
+          icon: BitmapDescriptor.fromBytes(item.id == id
+              ? widget.markerIconSelected!
+              : widget.markerIcon!),
         ),
       );
-    });
-
+    }
     setState(() {
       markers = _markers;
-      selectedMarker.value = current;
     });
   }
 
-  void setIndex(int index){
+  void setIndex(String id) {
+    int index = widget.items.indexWhere((item) => item.id == id);
     pageController.animateToPage(
       index,
       duration: Duration(milliseconds: 300),
@@ -231,9 +221,35 @@ class InteractiveMapsMarkerState extends State<InteractiveMapsMarker> {
   }
 
   void _onPageViewScroll() {
-    var index = pageController.page!.round();
-    if (currentIndex != index) {
-      _pageChanged(index);
+    if (pageController.page != null) {
+      int index = pageController.page!.round();
+      String id = widget.items[index].id;
+      if (currentMarkerId != id) {
+        _pageChanged(index);
+      }
+    }
+  }
+
+  void focusOnSelectedShop(String shopId) {
+    int index = widget.items.indexWhere((item) => item.id == shopId);
+    if (index != -1) {
+      MarkerItem selectedShop = widget.items[index];
+      mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(selectedShop.latitude, selectedShop.longitude),
+            zoom: 15.0,  // Adjust zoom level as needed
+          ),
+        ),
+      );
+      pageController.animateToPage(
+        index,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      setState(() {
+        currentMarkerId = shopId;
+      });
     }
   }
 }

@@ -37,7 +37,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final TextEditingController _closeTimeController = TextEditingController();
   final TextEditingController _detailsController = TextEditingController();
   final FirebaseShopRepo _shopRepo = FirebaseShopRepo();
-  ScrollPhysics _scrollPhysics = const BouncingScrollPhysics(); // Default scroll physics
+  ScrollPhysics _scrollPhysics = const BouncingScrollPhysics();
   String? _imagePath;
 
 
@@ -68,7 +68,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    // Pick an image from the gallery or camera
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     log(image!.path.toString());
     setState(() {
@@ -82,41 +81,36 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   void _fillFormWithExistingDetails() {
     _nameController.text = shop?.name ?? '';
 
-    // Check if shop.openTime is not null and format it
     if (shop?.openTime != null) {
       _openTimeController.text = '${(shop!.openTime ~/ 100).toString().padLeft(2, '0')}:${(shop!.openTime % 100).toString().padLeft(2, '0')}';
     } else {
-      _openTimeController.text = ''; // Set default or leave blank if no time is set
+      _openTimeController.text = '';
     }
 
-    // Check if shop.closeTime is not null and format it
     if (shop?.closeTime != null) {
       _closeTimeController.text = '${(shop!.closeTime ~/ 100).toString().padLeft(2, '0')}:${(shop!.closeTime % 100).toString().padLeft(2, '0')}';
     } else {
-      _closeTimeController.text = ''; // Set default or leave blank if no time is set
+      _closeTimeController.text = '';
     }
 
     _latitudeController.text = shop?.latitude ?? '';
     _longitudeController.text = shop?.longitude ?? '';
     _nextDropController.text = shop?.nextDrop != null ? DateFormat('dd.MM.yyyy').format(shop!.nextDrop!) : '';
-    _imagePath = shop!.picture.toString() ?? '';
+    _imagePath = shop!.picture.toString();
     _detailsController.text = shop!.details ?? '';
 
   }
 
   Widget buildImageWidget(String path) {
-    // Check if the path is a URL
     if (path.startsWith('http') || path.startsWith('https')) {
-      // It's a URL
       return Image.network(
         path,
         width: double.infinity,
         height: 300,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Icon(CupertinoIcons.photo, size: 100),
+        errorBuilder: (context, error, stackTrace) => const Icon(CupertinoIcons.photo, size: 100),
       );
     } else {
-      // It's a local file
       return Image.file(
         File(path),
         width: 200,
@@ -141,7 +135,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         centerTitle: true
       ),
       body: SingleChildScrollView(
-        physics: _scrollPhysics, // Apply dynamic scroll physics here
+        physics: _scrollPhysics,
         padding: const EdgeInsets.all(20),
         child: buildForm(),
       )
@@ -151,13 +145,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   Widget buildForm() {
     return Column(
       children: [
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Stack(
           alignment: Alignment.bottomRight,
           children: [
             _imagePath != null && _imagePath!.isNotEmpty
                 ? buildImageWidget(_imagePath!)
-                : SizedBox(
+                : const SizedBox(
               height: 300,
               width: double.infinity,
               child: Icon(CupertinoIcons.camera, size: 100),
@@ -166,21 +160,21 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
               padding: const EdgeInsets.all(10),
               child: FloatingActionButton(
                 onPressed: _pickImage,
-                child: Icon(Icons.edit),
+                child: const Icon(Icons.edit),
               ),
             ),
           ],
         ),
-        SizedBox(height: 10),
-        Text("Shop's Name:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+        const SizedBox(height: 10),
+        const Text("Shop's Name:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         TextField(
           controller: _nameController,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
-            filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
-            fillColor: Colors.white, // Set the
+            filled: true,
+            fillColor: Colors.white,
             hintText: "type here",
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Colors.grey),
@@ -191,15 +185,15 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
             ),
           ),
         ),
-        SizedBox(height: 10),
-        Text("Next Drop:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+        const SizedBox(height: 10),
+        const Text("Next Drop:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         DateInputWidget(
           controller: _nextDropController,
           hintText: "Next Drop",
 
         ),
-        SizedBox(height: 10),
-        Text("Details:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+        const SizedBox(height: 10),
+        const Text("Details:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         TextField(
           controller: _detailsController,
           textAlign: TextAlign.center,
@@ -207,10 +201,10 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
             MaxLinesTextInputFormatter(2),
           ],
           decoration: InputDecoration(
-            filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
-            fillColor: Colors.white, // Set the fill color to light blue
+            filled: true,
+            fillColor: Colors.white,
             hintText: "type here",
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Colors.grey),
@@ -223,13 +217,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
           maxLength: 90,
           maxLines: 2,
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
               child: Column(
                 children: [
-                  Text("Open Time:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  const Text("Open Time:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   TimeInputWidget(
                     controller: _openTimeController,
                     hintText: "Open Time",
@@ -294,8 +288,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     TextField(
                       controller: _latitudeController,
                         decoration: InputDecoration(
-                          filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
-                          fillColor: Colors.white, // Set the
+                          filled: true,
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -317,8 +311,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     TextField(
                       controller: _longitudeController,
                         decoration: InputDecoration(
-                          filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
-                          fillColor: Colors.white, // Set the
+                          filled: true,
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -443,9 +437,18 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   bool _validateInputs() {
     if (_nameController.text.isEmpty) {
-      showErrorDialog('Please enter the shop name.');
+      showErrorDialog("The shop's name can't be empty.");
       return false;
     }
+    if (_openTimeController.text.isEmpty) {
+      showErrorDialog('Please enter the open hours.');
+      return false;
+    }
+    if (_closeTimeController.text.isEmpty) {
+      showErrorDialog('Please enter the closing hours.');
+      return false;
+    }
+
     return true;
   }
 
@@ -489,7 +492,6 @@ class _DateInputWidgetState extends State<DateInputWidget> {
   @override
   void initState() {
     super.initState();
-    // Initialize _selectedDate with the last picked date or current date if none.
     _selectedDate = widget.controller.text.isNotEmpty
         ? DateFormat('dd.MM.yyyy').parse(widget.controller.text)
         : DateTime.now();
@@ -501,9 +503,8 @@ class _DateInputWidgetState extends State<DateInputWidget> {
       controller: widget.controller,
       textAlign: TextAlign.center,
 
-      readOnly: true, // To prevent manual editing
+      readOnly: true,
       onTap: () async {
-        // Show date picker on tap
         DateTime? pickedDate = await showDatePicker(
           context: context,
           initialDate: _selectedDate, // Use the last selected date or today
@@ -513,18 +514,17 @@ class _DateInputWidgetState extends State<DateInputWidget> {
         if (pickedDate != null) {
           setState(() {
             _selectedDate = pickedDate;
-            // Update the text field with the selected date
             widget.controller.text =
                 DateFormat('dd.MM.yyyy').format(_selectedDate);
           });
         }
       },
       decoration: InputDecoration(
-        filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
+        filled: true,
         fillColor: Colors.white, // Set the
         hintText: widget.controller.text.isNotEmpty
             ? widget.controller.text
-            : widget.hintText, // Hint text for the text field
+            : widget.hintText,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.grey),
@@ -563,12 +563,11 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
       controller: widget.controller,
       textAlign: TextAlign.center,
 
-      readOnly: true, // To prevent manual editing
+      readOnly: true,
       onTap: () async {
-        // Show time picker on tap
         TimeOfDay? pickedTime = await showTimePicker(
           context: context,
-          initialTime: TimeOfDay.now(), // Initial time
+          initialTime: TimeOfDay.now(),
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
@@ -579,17 +578,16 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
         if (pickedTime != null) {
           setState(() {
             _selectedTime = pickedTime;
-            // Update the text field with the selected time
             widget.controller.text = _formatTime(_selectedTime);
           });
         }
       },
       decoration: InputDecoration(
-        filled: true, // Don't forget to set filled to true, it's necessary for fillColor to take effect
-        fillColor: Colors.white, // Set the
+        filled: true,
+        fillColor: Colors.white,
         hintText: widget.controller.text.isNotEmpty
             ? widget.controller.text
-            : widget.hintText, // Hint text for the text field
+            : widget.hintText,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.grey),
@@ -618,12 +616,10 @@ class MaxLinesTextInputFormatter extends TextInputFormatter {
     final newText = newValue.text;
     int newlineCount = '\n'.allMatches(newText).length;
 
-    // Allow the new value only if it doesn't exceed maxLines
     if (newlineCount < maxLines) {
       return newValue;
     }
 
-    // If new input attempts to exceed maxLines, retain the old value
     return oldValue;
   }
 }

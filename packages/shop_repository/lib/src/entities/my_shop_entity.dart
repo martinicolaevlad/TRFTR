@@ -4,16 +4,16 @@ import 'package:equatable/equatable.dart';
 class MyShopEntity extends Equatable {
   final String id;
   final String name;
-  final int rating; // Rating as integer
+  final int rating;
   final String? picture;
-  final DateTime? nextDrop; // Using DateTime for drop times
-  final DateTime? lastDrop; // Using DateTime for drop times
+  final DateTime? nextDrop;
+  final DateTime? lastDrop;
   final String latitude;
   final String longitude;
-  final int openTime; // Store open time as an integer (e.g., 900 for 9:00 AM)
-  final int closeTime; // Store close time as an integer (e.g., 1700 for 5:00 PM)
+  final int openTime;
+  final int closeTime;
   final String? ownerId;
-  final String? details; // Additional details about the shop
+  final String? details;
   final int ratingsCount;
 
   const MyShopEntity({

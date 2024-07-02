@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notification_repository/notification_repository.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 import 'package:shop_repository/shop_repository.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
@@ -13,7 +14,8 @@ import 'package:sh_app/blocs/notification_bloc/notification_bloc.dart';
 import '../../components/rainbow.dart';
 import '../home/detail_screen.dart';
 class Inbox extends StatefulWidget {
-  const Inbox({Key? key}) : super(key: key);
+  final PersistentTabController controller;
+  const Inbox({Key? key, required this.controller}) : super(key: key);
 
   @override
   _InboxState createState() => _InboxState();
@@ -26,9 +28,7 @@ class _InboxState extends State<Inbox> {
   @override
   void initState() {
     super.initState();
-    // We assume MyUserBloc is provided above this in the widget tree.
     userId = context.read<MyUserBloc>().state.user!.id;
-    // Triggering the event to start listening to the notifications.
     // context.read<NotificationBloc>().add(LoadNotifications(userId));
   }
 
@@ -49,11 +49,9 @@ class _InboxState extends State<Inbox> {
       ),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {
-          log(state.toString());
           if (state is NotificationLoading) {
             return Center(child: CircularProgressIndicator());
           } else if (state is NotificationLoaded) {
-            log(state.notifications.toString());
             if (state.notifications.isEmpty) {
               return Center(child: Text('No notifications available'));
             }
@@ -72,17 +70,15 @@ class _InboxState extends State<Inbox> {
                         ),
                         tileColor: Colors.white,
                           leading: FutureBuilder<Widget>(
-                            future: getIconBasedOnText(notification), // Assume this is an async function returning IconData
+                            future: getIconBasedOnText(notification),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.done) {
                                 if (snapshot.hasData) {
                                   return Container(child: snapshot.data);
                                 } else {
-                                  // Default icon if no data is found or error
                                   return Icon(Icons.error);
                                 }
                               } else {
-                                // Show loading indicator while waiting
                                 return CircularProgressIndicator();
                               }
                             },
@@ -111,7 +107,7 @@ class _InboxState extends State<Inbox> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => DetailScreen(shop: shop, user: userState.user!),
+                                        builder: (context) => DetailScreen(shop: shop, user: userState.user!, controller: widget.controller,),
                                       ),
                                     );
                                   } else {
@@ -248,7 +244,7 @@ class _InboxState extends State<Inbox> {
 //             context,
 //             MaterialPageRoute(builder: (context) => DetailScreen(shop: shop, user: user)),
 //           );
-//           subscription.cancel();  // Important to cancel subscription after navigation
+//           subscription.cancel();
 //         }
 //       }
 //     });

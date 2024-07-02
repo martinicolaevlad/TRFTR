@@ -21,6 +21,7 @@ dependencies:
   google_fonts: ^6.2.1
   meta: ^1.11.0
   intl: ^0.19.0
+  mockito: ^5.4.4
   #Firebase
   firebase_core: ^2.29.0
   firebase_auth: ^4.19.1
@@ -29,11 +30,12 @@ dependencies:
   firebase_app_check: ^0.2.2+5
   firebase_messaging: ^14.9.2
   flutter_local_notifications: ^17.1.2
+  fake_cloud_firestore: ^2.5.2
   #Bloc
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5
   bloc: ^8.1.4
-
+  bloc_test: ^9.1.7
   #GoogleMaps
   dio: ^5.4.2+1
   flutter_polyline_points: ^2.0.0

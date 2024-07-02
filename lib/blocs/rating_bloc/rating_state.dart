@@ -21,7 +21,7 @@ class RatingsLoaded extends RatingState {
 }
 
 class RatingLoaded extends RatingState {
-  final Rating rating;
+  final Rating? rating;
 
   const RatingLoaded({required this.rating});
 

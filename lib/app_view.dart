@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notification_repository/notification_repository.dart';
 import 'package:rating_repository/rating_repository.dart';
 import 'package:sh_app/blocs/favorite_bloc/favorite_bloc.dart';
+import 'package:sh_app/blocs/map_bloc/map_bloc.dart';
 import 'package:sh_app/blocs/notification_bloc/notification_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/create_shop_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
@@ -63,8 +64,9 @@ class MyAppView extends StatelessWidget {
                 BlocProvider(create: (context) => RatingBloc(ratingRepo: FirebaseRatingRepo(), userRepo: FirebaseUserRepository())
                   ),
                 BlocProvider(create: (context) => NotificationBloc(notificationRepo: FirebaseNotificationRepo(),)..add(LoadNotifications(context.read<AuthenticationBloc>().state.user!.uid)),
-                  )
-            ] ,
+                  ),
+               BlocProvider(create: (context) => MapBloc(),
+               )] ,
            child: const PersistentTabScreen());
       }else{
         return StartScreen();

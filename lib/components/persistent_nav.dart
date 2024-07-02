@@ -22,9 +22,9 @@ class _PersistentTabScreenState extends State<PersistentTabScreen> {
 
   List<Widget> _buildScreens() {
     return [
-      Home(),
-      Favourites(),
-      Inbox(),
+      Home(controller: _controller),
+      Favourites(controller: _controller),
+      Inbox(controller: _controller),
       ProfileScreen()
     ];
   }

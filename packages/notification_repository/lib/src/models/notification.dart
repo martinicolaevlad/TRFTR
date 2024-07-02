@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../notification_repository.dart'; // Update the import path as needed
+import '../../notification_repository.dart';
 
 class MyNotification extends Equatable {
   final String userId;

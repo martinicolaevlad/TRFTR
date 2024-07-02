@@ -52,25 +52,31 @@ class FirebaseRatingRepo implements RatingRepo {
   }
 
   @override
-  Stream<Rating> getRating(String shopId, String userId) {
-    return ratingsCollection
+  Future<Rating?> getRating(String shopId, String userId) async {
+    log("In repo");
+    try{
+    final querySnapshot = await ratingsCollection
         .where('shopId', isEqualTo: shopId)
         .where('userId', isEqualTo: userId)
-        .orderBy('time', descending: true)
-        .limit(1)
-        .snapshots()
-        .map((snapshot) {
-        return Rating.fromEntity(RatingEntity.fromDocument(snapshot.docs.first.data()));
-
-
-    });
+       .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      var doc = querySnapshot.docs.first;
+      return Rating.fromEntity(RatingEntity.fromDocument(doc.data()));
+    } else {
+      log('No rating found for shopId: $shopId from userId: $userId');
+      return null;
+    }
+  } catch (e) {
+  log('Error fetching shop by ownerId $shopId: ${e.toString()}');
+  rethrow;
+  }
   }
 
 
 
   @override
   Stream<List<Rating>> getRatingsByShopId(String shopId, String orderBy) {
-    if (orderBy == 'newest') {
+    if (orderBy == 'latest') {
       return ratingsCollection
           .where('shopId', isEqualTo: shopId)
           .orderBy('time', descending: true)

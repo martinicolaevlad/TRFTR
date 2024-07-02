@@ -91,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (context.read<MyUserBloc>().state.user!.isOwner)
                             ProfileMenuWidget(title: "My Shop", icon: FontAwesomeIcons.store, onPress: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => CreateShopScreen(context.read<MyUserBloc>().state.user!))); // Navigate to the CreateShopScreen
+                                  builder: (_) => CreateShopScreen(context.read<MyUserBloc>().state.user!)));
                             }),
                           ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
                           const Divider(),
