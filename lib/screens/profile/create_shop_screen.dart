@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -9,19 +8,15 @@ import 'package:intl/intl.dart';
 import 'package:shop_repository/shop_repository.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../../blocs/my_user_bloc/my_user_bloc.dart';
 import '../../blocs/shop_blocs/create_shop_bloc.dart';
-
 import '../../blocs/shop_blocs/get_shop_bloc.dart';
 import '../../blocs/shop_blocs/update_shop_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CreateShopScreen extends StatefulWidget {
   final MyUser myUser;
-
   const CreateShopScreen(this.myUser, {super.key});
-
   @override
   _CreateShopScreenState createState() => _CreateShopScreenState();
 }
@@ -39,7 +34,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final FirebaseShopRepo _shopRepo = FirebaseShopRepo();
   ScrollPhysics _scrollPhysics = const BouncingScrollPhysics();
   String? _imagePath;
-
+  Set<Marker> markers = {};
 
   @override
   void initState() {
@@ -47,12 +42,15 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     initializeShopDetails();
   }
 
-
-
   void _onMapLongPress(LatLng position) {
     setState(() {
       _latitudeController.text = position.latitude.toString();
       _longitudeController.text = position.longitude.toString();
+      markers.add(Marker(
+        markerId: MarkerId("selectedLocation"),
+        position: position,
+        infoWindow: InfoWindow(title: 'Selected Shop Location'),
+      ));
     });
   }
 
@@ -74,31 +72,25 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       _imagePath = image.path;
       _pictureController.text = _imagePath!;
     });
-
   }
-
 
   void _fillFormWithExistingDetails() {
     _nameController.text = shop?.name ?? '';
-
     if (shop?.openTime != null) {
       _openTimeController.text = '${(shop!.openTime ~/ 100).toString().padLeft(2, '0')}:${(shop!.openTime % 100).toString().padLeft(2, '0')}';
     } else {
       _openTimeController.text = '';
     }
-
     if (shop?.closeTime != null) {
       _closeTimeController.text = '${(shop!.closeTime ~/ 100).toString().padLeft(2, '0')}:${(shop!.closeTime % 100).toString().padLeft(2, '0')}';
     } else {
       _closeTimeController.text = '';
     }
-
     _latitudeController.text = shop?.latitude ?? '';
     _longitudeController.text = shop?.longitude ?? '';
     _nextDropController.text = shop?.nextDrop != null ? DateFormat('dd.MM.yyyy').format(shop!.nextDrop!) : '';
     _imagePath = shop!.picture.toString();
     _detailsController.text = shop!.details ?? '';
-
   }
 
   Widget buildImageWidget(String path) {
@@ -120,25 +112,20 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.grey.shade300,
-
         appBar: AppBar(
             backgroundColor: Colors.white,
-            title: Text("My Shop", style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold
-        ),),
-        centerTitle: true
-      ),
-      body: SingleChildScrollView(
-        physics: _scrollPhysics,
-        padding: const EdgeInsets.all(20),
-        child: buildForm(),
-      )
+            title: Text("My Shop", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+            centerTitle: true
+        ),
+        body: SingleChildScrollView(
+          physics: _scrollPhysics,
+          padding: const EdgeInsets.all(20),
+          child: buildForm(),
+        )
     );
   }
 
@@ -149,19 +136,10 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         Stack(
           alignment: Alignment.bottomRight,
           children: [
-            _imagePath != null && _imagePath!.isNotEmpty
-                ? buildImageWidget(_imagePath!)
-                : const SizedBox(
-              height: 300,
-              width: double.infinity,
-              child: Icon(CupertinoIcons.camera, size: 100),
-            ),
+            _imagePath != null && _imagePath!.isNotEmpty ? buildImageWidget(_imagePath!) : const SizedBox(height: 300, width: double.infinity, child: Icon(CupertinoIcons.camera, size: 100)),
             Padding(
               padding: const EdgeInsets.all(10),
-              child: FloatingActionButton(
-                onPressed: _pickImage,
-                child: const Icon(Icons.edit),
-              ),
+              child: FloatingActionButton(onPressed: _pickImage, child: const Icon(Icons.edit)),
             ),
           ],
         ),
@@ -190,16 +168,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         DateInputWidget(
           controller: _nextDropController,
           hintText: "Next Drop",
-
         ),
         const SizedBox(height: 10),
         const Text("Details:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         TextField(
           controller: _detailsController,
           textAlign: TextAlign.center,
-          inputFormatters: [
-            MaxLinesTextInputFormatter(2),
-          ],
+          inputFormatters: [MaxLinesTextInputFormatter(2)],
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
@@ -254,24 +229,15 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
             onPointerUp: (PointerUpEvent event) {_enableScroll();},
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey), // Border color
-                borderRadius: BorderRadius.circular(10), // Rounded corners
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10),
               ),
               clipBehavior: Clip.antiAlias,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: GoogleMap(
-                  initialCameraPosition: const CameraPosition(
-                    target: LatLng(46.7, 23.6),
-                    zoom: 10,
-                  ),
-                  markers: shop != null ? {
-                    Marker(
-                      markerId: MarkerId("shopLocation"),
-                      position: LatLng(double.parse(_latitudeController.text.isEmpty ? shop!.latitude : _latitudeController.text),
-                          double.parse(_longitudeController.text.isEmpty ? shop!.longitude : _longitudeController.text)),
-                    )
-                  }: {},
+                  initialCameraPosition: const CameraPosition(target: LatLng(46.7, 23.6), zoom: 10),
+                  markers: markers,
                   onLongPress: _onMapLongPress,
                 ),
               ),
@@ -280,53 +246,55 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         ),
         const SizedBox(height: 10),
         Row(
-          children: [
-            Expanded(
-                child: Column(
-                  children: [
-                    Text("Latitude:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                    TextField(
-                      controller: _latitudeController,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.grey),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
-                          ),
-                        ),
-                    ),
-                  ],
-                )),
-            SizedBox(width: 10),
-            Expanded(
-                child: Column(
-                  children: [
-                    Text("Longitude:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                    TextField(
-                      controller: _longitudeController,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.grey),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+            children: [
+              Expanded(
+                  child: Column(
+                      children: [
+                        Text("Latitude:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                        TextField(
+                          controller: _latitudeController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                            ),
                           ),
                         ),
-                    ),
-                  ],
-                )),
-          ],
+                      ]
+                  )
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                  child: Column(
+                      children: [
+                        Text("Longitude:", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                        TextField(
+                          controller: _longitudeController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                            ),
+                          ),
+                        ),
+                      ]
+                  )
+              ),
+            ]
         ),
         SizedBox(height: 10),
         ElevatedButton(
@@ -359,37 +327,29 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     if (!_validateInputs()) {
       return;
     }
-
     if (shop == null) {
       shop = MyShop.empty;
     }
-
     shop!.name = _nameController.text;
     shop!.latitude = _latitudeController.text;
     shop!.longitude = _longitudeController.text;
-
     if(_detailsController.text.isNotEmpty){
       shop!.details = _detailsController.text;
     }
-
     if (_nextDropController.text.isNotEmpty) {
       shop!.nextDrop = DateFormat('dd.MM.yyyy').parse(_nextDropController.text, true);
-
     }
-
     final myUserBloc = context.read<MyUserBloc>();
     if (myUserBloc.state.user != null) {
       shop!.ownerId = myUserBloc.state.user!.id;
     } else {
       return;
     }
-
     try {
       List<String> openTimeParts = _openTimeController.text.split(':');
       if (openTimeParts.length == 2) {
         shop!.openTime = int.parse(openTimeParts[0]) * 100 + int.parse(openTimeParts[1]);
       }
-
       List<String> closeTimeParts = _closeTimeController.text.split(':');
       if (closeTimeParts.length == 2) {
         shop!.closeTime = int.parse(closeTimeParts[0]) * 100 + int.parse(closeTimeParts[1]);
@@ -398,7 +358,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       showErrorDialog("Error parsing time: $e");
       return;
     }
-
     if (_pictureController.text.isNotEmpty) {
       try {
         await _shopRepo.uploadPicture(_pictureController.text, shop!.id);
@@ -407,23 +366,21 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         return;
       }
     }
-
     _shopRepo.getShopByOwnerId(widget.myUser.id).then((existingShop) {
       if (existingShop != null) {
         BlocProvider.of<UpdateShopBloc>(context).add(UpdateShop(
-          shopId: existingShop.id,
-          name: shop!.name,
-          latitude: shop!.latitude,
-          longitude: shop!.longitude,
-          nextDrop: shop!.nextDrop,
-          openTime: shop!.openTime,
-          closeTime: shop!.closeTime,
-          ownerId: widget.myUser.id,
-          details: shop!.details,
-          rating: shop!.rating,
-          ratingsCount: shop!.ratingsCount
+            shopId: existingShop.id,
+            name: shop!.name,
+            latitude: shop!.latitude,
+            longitude: shop!.longitude,
+            nextDrop: shop!.nextDrop,
+            openTime: shop!.openTime,
+            closeTime: shop!.closeTime,
+            ownerId: widget.myUser.id,
+            details: shop!.details,
+            rating: shop!.rating,
+            ratingsCount: shop!.ratingsCount
         ));
-
       } else {
         BlocProvider.of<CreateShopBloc>(context).add(CreateShop(shop!));
       }
@@ -433,7 +390,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       showErrorDialog("Error accessing shop data: $error");
     });
   }
-
 
   bool _validateInputs() {
     if (_nameController.text.isEmpty) {
@@ -448,7 +404,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       showErrorDialog('Please enter the closing hours.');
       return false;
     }
-
     return true;
   }
 
@@ -471,20 +426,18 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   }
 }
 
-
 class DateInputWidget extends StatefulWidget {
-    final TextEditingController controller;
-    final String hintText;
+  final TextEditingController controller;
+  final String hintText;
+  const DateInputWidget({
+    required this.controller,
+    required this.hintText,
+    Key? key,
+  }) : super(key: key);
 
-    const DateInputWidget({
-      required this.controller,
-      required this.hintText,
-      Key? key,
-    }) : super(key: key);
-
-    @override
-    _DateInputWidgetState createState() => _DateInputWidgetState();
-  }
+  @override
+  _DateInputWidgetState createState() => _DateInputWidgetState();
+}
 
 class _DateInputWidgetState extends State<DateInputWidget> {
   late DateTime _selectedDate;
@@ -502,29 +455,25 @@ class _DateInputWidgetState extends State<DateInputWidget> {
     return TextField(
       controller: widget.controller,
       textAlign: TextAlign.center,
-
       readOnly: true,
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
           context: context,
-          initialDate: _selectedDate, // Use the last selected date or today
-          firstDate: DateTime(2000), // First selectable date
-          lastDate: DateTime(2101), // Last selectable date
+          initialDate: _selectedDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2101),
         );
         if (pickedDate != null) {
           setState(() {
             _selectedDate = pickedDate;
-            widget.controller.text =
-                DateFormat('dd.MM.yyyy').format(_selectedDate);
+            widget.controller.text = DateFormat('dd.MM.yyyy').format(_selectedDate);
           });
         }
       },
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white, // Set the
-        hintText: widget.controller.text.isNotEmpty
-            ? widget.controller.text
-            : widget.hintText,
+        fillColor: Colors.white,
+        hintText: widget.controller.text.isNotEmpty ? widget.controller.text : widget.hintText,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.grey),
@@ -537,8 +486,6 @@ class _DateInputWidgetState extends State<DateInputWidget> {
     );
   }
 }
-
-
 
 class TimeInputWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -562,7 +509,6 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
     return TextField(
       controller: widget.controller,
       textAlign: TextAlign.center,
-
       readOnly: true,
       onTap: () async {
         TimeOfDay? pickedTime = await showTimePicker(
@@ -578,16 +524,14 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
         if (pickedTime != null) {
           setState(() {
             _selectedTime = pickedTime;
-            widget.controller.text = _formatTime(_selectedTime);
+            widget.controller.text = '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
           });
         }
       },
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
-        hintText: widget.controller.text.isNotEmpty
-            ? widget.controller.text
-            : widget.hintText,
+        hintText: widget.controller.text.isNotEmpty ? widget.controller.text : widget.hintText,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.grey),
@@ -599,27 +543,19 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
       ),
     );
   }
-  String _formatTime(TimeOfDay time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
 }
-
 
 class MaxLinesTextInputFormatter extends TextInputFormatter {
   final int maxLines;
-
   MaxLinesTextInputFormatter(this.maxLines);
-
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     final newText = newValue.text;
     int newlineCount = '\n'.allMatches(newText).length;
-
     if (newlineCount < maxLines) {
       return newValue;
     }
-
     return oldValue;
   }
 }

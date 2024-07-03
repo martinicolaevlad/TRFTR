@@ -10,6 +10,7 @@ import 'package:sh_app/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:sh_app/blocs/shop_blocs/get_shop_bloc.dart';
 import 'package:sh_app/screens/home/detail_screen.dart';
 import 'package:sh_app/screens/profile/create_shop_screen.dart';
+import 'package:sh_app/screens/profile/info_screen.dart';
 import 'package:shop_repository/shop_repository.dart';
 import '../../blocs/log_in_bloc/log_in_bloc.dart';
 
@@ -39,15 +40,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 30),
-                          SizedBox(
+                          const SizedBox(
                             width: 120,
-                            height: 120,
-                            child: Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: const FaIcon(FontAwesomeIcons.userNinja, size: 100),
-                              ),
-                            ),
+                            height: 40,
+                            // child: Center(
+                            //   child: ClipRRect(
+                            //     borderRadius: BorderRadius.circular(100),
+                            //     child: const Imag,
+                            //   ),
+                            // ),
                           ),
                           const SizedBox(height: 10),
 
@@ -79,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               }
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 70),
 
 
 
@@ -87,13 +88,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const Divider(),
                           const SizedBox(height: 10),
 
-                          ProfileMenuWidget(title: "Edit Profile", icon: FontAwesomeIcons.user, onPress: () {}),
+                          // ProfileMenuWidget(title: "Edit Profile", icon: FontAwesomeIcons.user, onPress: () {}),
                           if (context.read<MyUserBloc>().state.user!.isOwner)
                             ProfileMenuWidget(title: "My Shop", icon: FontAwesomeIcons.store, onPress: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (_) => CreateShopScreen(context.read<MyUserBloc>().state.user!)));
                             }),
-                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {}),
+                          ProfileMenuWidget(title: "Info", icon: FontAwesomeIcons.info, onPress: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => InfoPage()));
+                          }),
                           const Divider(),
                           const SizedBox(height: 10),
                           ProfileMenuWidget(

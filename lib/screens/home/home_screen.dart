@@ -25,6 +25,9 @@ class _HomeState extends State<Home> {
   final List<MarkerItem> markers = [];
   final TextEditingController _searchController = TextEditingController();
   GlobalKey<InteractiveMapsMarkerState> mapKey = GlobalKey();
+  late List<MyShop> shopz;
+  List<MyShop> filteredShops = [];
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +44,7 @@ class _HomeState extends State<Home> {
           child: BlocBuilder<GetShopBloc, GetShopState>(
             builder: (context, state) {
               if (state is GetShopSuccess) {
+                shopz = state.shops;
                 markers.clear();
                 state.shops.forEach((shop) {
                   double parsedLatitude = double.tryParse(shop.latitude) ?? 0.0;
@@ -71,7 +75,48 @@ class _HomeState extends State<Home> {
                             padding: const EdgeInsets.all(20.0),
                             child: _buildSearchField(),
                           ),
+                          if (_searchController.text.isNotEmpty)
+                            Expanded(
+                              child: Container(
+                                color: Colors.white,
+                                child: ListView.builder(
+                                  itemCount: filteredShops.length,
+                                  itemBuilder: (context, index) {
+                                    MyShop shop = filteredShops[index];
+                                    return BlocBuilder<MyUserBloc, MyUserState>(
+                                    builder: (context, state) {
+                                      return ListTile(
+                                      title: Text(shop.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                                      leading: Container(
+                                        height: 60,
+                                        width: 60,
+                                        decoration: BoxDecoration(
+                                          border: Border(top: BorderSide(width: 1, color: Colors.grey.shade400), bottom: BorderSide(width: 1, color: Colors.grey.shade400),),
+                                          image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: isValidPicture(shop.picture)
+                                                ? NetworkImage(shop.picture!)
+                                                : const AssetImage('assets/2.png') as ImageProvider,
+                                          ),
+                                        ),
+                                      ),
+                                      onTap: () {
 
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => DetailScreen(shop: shop, user: state.user!, controller: widget.controller),
+                                            ),
+                                          );
+                                          _searchController.clear();
+                                      },
+                                    );
+                                    },
+                                  );
+                                  },
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ],
@@ -93,6 +138,7 @@ class _HomeState extends State<Home> {
     return Column(
       children: [
         Container(
+          // color: _searchController.text.isNotEmpty ? Colors.white : Colors.transparent, // White if not empty, otherwise transparent
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -106,13 +152,31 @@ class _HomeState extends State<Home> {
               border: InputBorder.none,
               prefixIcon: Icon(Icons.search),
             ),
+            onChanged: (text) => searchShops(text),  // Properly hook up the search function
           ),
         ),
-
       ],
     );
   }
+
+  void searchShops(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredShops = shopz;
+      } else {
+        filteredShops = shopz.where((shop) {
+          final name = shop.name.toLowerCase();
+          final input = query.toLowerCase();
+          return name.contains(input);
+        }).toList();
+      }
+    });
+  }
+  bool isValidPicture(String? url) {
+    return url != null && url.isNotEmpty && Uri.tryParse(url)?.hasAbsolutePath == true;
+  }
 }
+
 
 class BottomTile extends StatelessWidget {
   final MyShop item;
@@ -152,14 +216,15 @@ class BottomTile extends StatelessWidget {
           Container(
             height: double.infinity,
             width: 120.0,
-            color: Colors.red.shade900,
-            child: isValidPicture(item.picture)
-                ? Image.network(
-              item.picture!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(CupertinoIcons.photo, size: 100),
-            )
-                : const Icon(CupertinoIcons.photo, size: 100),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(width: 1, color: Colors.grey.shade400), bottom: BorderSide(width: 1, color: Colors.grey.shade400),),
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: isValidPicture(item.picture)
+                    ? NetworkImage(item.picture!)
+                    : const AssetImage('assets/2.png') as ImageProvider,
+              ),
+            ),
           ),
           Expanded(
             child: Padding(

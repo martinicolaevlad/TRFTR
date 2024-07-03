@@ -255,49 +255,53 @@ class _DetailScreenState extends State<DetailScreen> {
               child: BlocBuilder<RatingBloc, RatingState>(
                 builder: (context, state) {
                   if (state is RatingsLoaded) {
-                    return Expanded(
-                      child: ListView.builder(
-                        itemCount: state.ratingsWithUser.length,
-                        itemBuilder: (context, index) {
-                          final rating = state.ratingsWithUser[index].rating;
-                            return Container(
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Colors.grey.shade400,
-                                        width: 1,
+                    return RefreshIndicator(
+                        onRefresh: () async {
+                          context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
+                        },
+                        child: ListView.builder(
+                          itemCount: state.ratingsWithUser.length,
+                          itemBuilder: (context, index) {
+                            final rating = state.ratingsWithUser[index].rating;
+                              return Container(
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Colors.grey.shade400,
+                                          width: 1,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  child: ListTile(
-                                    title: Row(
-                                      children: [
-                                        SizedBox(width: 70, child: Text(state.ratingsWithUser[index].userName)),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          '• ${rating.time.day < 10 ? "0${rating.time.day}" : "${rating.time.day}"}.${rating.time.month < 10 ? "0${rating.time.month}" : "${rating.time.month}"}.${rating.time.year} •',
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                    subtitle: Text(rating.review),
-                                    trailing: Container(
-                                      width: 40,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
+                                    child: ListTile(
+                                      title: Row(
                                         children: [
-                                          Text(rating.rating.toString(), style: TextStyle(color: Colors.orangeAccent, fontSize: 17)),
-                                          Icon(Icons.star, color: Colors.orangeAccent),
+                                          SizedBox(width: 80, child: Text(state.ratingsWithUser[index].userName)),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            '• ${rating.time.day < 10 ? "0${rating.time.day}" : "${rating.time.day}"}.${rating.time.month < 10 ? "0${rating.time.month}" : "${rating.time.month}"}.${rating.time.year} •',
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
                                         ],
                                       ),
+                                      subtitle: Text(rating.review),
+                                      trailing: Container(
+                                        width: 40,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(rating.rating.toString(), style: TextStyle(color: Colors.orangeAccent, fontSize: 17)),
+                                            Icon(Icons.star, color: Colors.orangeAccent),
+                                          ],
+                                        ),
+                                      ),
+                        
                                     ),
+                                  );
+                                  ;
+                        
+                          },
+                        ),
 
-                                  ),
-                                );
-                                ;
-
-                        },
-                      ),
                     );
                   } else if (state is RatingLoading) {
                     return Center(child: CircularProgressIndicator());

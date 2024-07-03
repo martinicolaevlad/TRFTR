@@ -213,11 +213,12 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
                           );
                           if(state is RatingFailure){
                             context.read<RatingBloc>().add(AddRating(newRating));
-                            // context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
+                            context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
+                            log("ratings in failure " + state.toString());
+
                           }
                           else if (state is RatingLoaded)
                           {
-                            log('is aici fac update u');
                             context.read<RatingBloc>().add(UpdateRating(
                               ratingId: state.rating!.id,
                               rating: _selectedStars,
@@ -229,6 +230,10 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
                           }
                           context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
                           Navigator.of(context).pop();
+                          context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
+                          log("ratings in RatingLoaded " + state.toString());
+
+
                         }
                       },
                       backgroundColor: Colors.red.shade900,
@@ -243,7 +248,7 @@ class _RatingInputWidgetState extends State<RatingInputWidget> {
                     child: FloatingActionButton(
                       onPressed: () {
                         context.read<RatingBloc>().add(LoadRatings(widget.shop.id, 'latest'));
-
+                        log("ratings in cancel " + state.toString());
                         Navigator.of(context).pop();
                       },
                       backgroundColor: Colors.white,
